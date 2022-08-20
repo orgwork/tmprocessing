@@ -1,5 +1,5 @@
 #include "rtpapi.h"
-#include "../CommonClasses/Configuration.h"
+#include "../CommonClasses/TMConfiguration.h"
 #include "../includes/HkTmShmBuf.h"
 
 
@@ -9,16 +9,37 @@ struct rtpApiStruct
     string tmId;
     string obcId;
     string identifier;
-    Configuration config;
+    TMConfiguration config;
+    bool isValidated;
 
-    map<string, HkTmDataBufDef *> shmMap;
+    map<string, TmOpDataBufDef *> shmMap;
     map<string, int> pidMap;
 
     rtpApiStruct(string scId): config(scId) {}
 };
 
 
-bool attachToSharedMemory(rtpApiStruct *obj, string identifier, int shmKey, string &errMsg);
+bool attachToSharedMemory(rtpApiStruct *obj, string identifier, int shmKey, string &errMsg)
+{
+    int shmid = shmget(shmKey, 0, 0);
+    if (shmid != -1)
+    {
+        obj->shmMap[identifier] = (TmOpDataBufDef *)shmat(shmid, 0, SHM_RDONLY);
+
+        if (obj->shmMap[identifier]  == (void *) -1)
+        {
+            errMsg = errMsg + "Failed to attach SHM for " + identifier + "\n";
+            return FAILURE;
+        }
+    }
+    else
+    {
+        errMsg = errMsg + "Failed to attach SHM for " + identifier + "\n";
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
 
 
 rtpApi initRtpApi(char *scId, bool *ok, char *errMsg)
@@ -71,33 +92,48 @@ rtpApi initRtpApi(char *scId, bool *ok, char *errMsg)
         }
     }
 
-    *ok = true;
-    strncpy(errMsg, errorMsg.c_str(), 500);
+    if (obj->shmMap.size() > 0)
+        *ok = true;
+    else
+        *ok = false;
 
-    return (void *)obj;
-}
-
-
-bool attachToSharedMemory(rtpApiStruct *obj, string identifier, int shmKey, string &errMsg)
-{
-    int shmid = shmget(shmKey, 0, 0);
-    if (shmid != -1)
+// temporary code
+    char *umacsPath = getenv("UMACS_PATH");
+    if (umacsPath == NULL)
     {
-        obj->shmMap[identifier] = (HkTmDataBufDef *)shmat(shmid, 0, SHM_RDONLY);
-
-        if (obj->shmMap[identifier]  == (void *) -1)
-        {
-            errMsg = errMsg + "Failed to attach SHM for " + identifier + "\n";
-            return FAILURE;
-        }
+        errorMsg = "No Environment Variable 'UMACS_PATH' found";
+        *ok = false;
+    }
+    string basePath = umacsPath;
+    string filepath = basePath + "/" + scId + "/TM_PROC/CDBId_PidNum." + scId ;
+    ifstream file;
+    file.open(filepath);
+    if (!file.is_open())
+    {
+        errorMsg = "Could not open the file: " + filepath;
+        *ok = false;
     }
     else
     {
-        errMsg = errMsg + "Failed to attach SHM for " + identifier + "\n";
-        return FAILURE;
+        string line;
+        int index = 0;
+        while (getline(file, line))
+        {
+            line = StringUtils::trim(line);
+            vector<string> fields = StringUtils::splitFields(line);
+            obj->pidMap[fields.at(0)] = index;
+            index++;
+        }
     }
+// temporary code
+    if (obj->pidMap.size() > 0)
+        *ok = true;
+    else
+        *ok = false;
 
-    return SUCCESS;
+    strncpy(errMsg, errorMsg.c_str(), 500);
+
+    return (void *)obj;
 }
 
 
@@ -111,7 +147,7 @@ bool deleteRtpApi(rtpApi obj)
 }
 
 
-bool setStationId(rtpApi obj, const char *stnId)
+bool setStationId(rtpApi obj, const char *stnId, char *errMsg)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
@@ -127,7 +163,7 @@ bool setStationId(rtpApi obj, const char *stnId)
 }
 
 
-bool setTmId(rtpApi obj, const char *tmId)
+bool setTmId(rtpApi obj, const char *tmId, char *errMsg)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
@@ -142,7 +178,7 @@ bool setTmId(rtpApi obj, const char *tmId)
 }
 
 
-bool setObcId(rtpApi obj, const char *obcId)
+bool setObcId(rtpApi obj, const char *obcId, char *errMsg)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
@@ -157,19 +193,48 @@ bool setObcId(rtpApi obj, const char *obcId)
 }
 
 
-bool getPidValue(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long int *tmCount)
+bool validate(rtpApi obj, char *errMsg)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
-//    HkTmDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+    if (!apiStruct->config.isValidStationId(apiStruct->stnId))
+    {
+        strncpy(errMsg, "INVALID STN-ID", 500);
+        return FAILURE;
+    }
 
-//    *realValue = ptr->PrcOpBuf[apiStruct->pidMap[pid]].RealValue;
-//    strncpy(stringValue, ptr->PrcOpBuf[apiStruct->pidMap[pid]].StringValue, 14);
-//    *tmCount = ptr->PrcOpBuf[apiStruct->pidMap[pid]].TmCount;
+    if (!apiStruct->config.isValidTmId(apiStruct->stnId, apiStruct->tmId))
+    {
+        strncpy(errMsg, "INVALID TM-ID", 500);
+        return FAILURE;
+    }
 
-    *realValue = 5.0;
-    strncpy(stringValue, "ok", 15);
-    *tmCount = 105;
+    if (!apiStruct->config.isValidObcId(apiStruct->stnId, apiStruct->tmId, apiStruct->obcId))
+    {
+        strncpy(errMsg, "INVALID OBC-ID", 500);
+        return FAILURE;
+    }
+
+    apiStruct->isValidated = true;
+
+    return SUCCESS;
+}
+
+
+bool getPidVal(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long int *tmCount)
+{
+    rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
+
+    if (!apiStruct->isValidated)
+        return FAILURE;
+
+    int pidIndex = apiStruct->pidMap[pid];
+
+    TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+
+    *realValue = ptr->HkTmPrcOpBuf[pidIndex].RealValue;
+    strncpy(stringValue, ptr->HkTmPrcOpBuf[pidIndex].StringValue, 15);
+    *tmCount = ptr->HkTmPrcOpBuf[pidIndex].TmCount;
 
     return SUCCESS;
 }
@@ -179,9 +244,12 @@ bool getRealPidValue(rtpApi obj, const char *pid, double *realValue)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
-    HkTmDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+    if (!apiStruct->isValidated)
+        return FAILURE;
 
-    *realValue = ptr->PrcOpBuf[apiStruct->pidMap[pid]].RealValue;
+    TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+
+    *realValue = ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].RealValue;
 
     return SUCCESS;
 }
@@ -191,8 +259,11 @@ bool getStringPidValue(rtpApi obj, const char *pid, char *stringValue)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
-    HkTmDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
-    stringValue = ptr->PrcOpBuf[apiStruct->pidMap[pid]].StringValue;
+    if (!apiStruct->isValidated)
+        return FAILURE;
+
+    TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+    strncpy(stringValue, ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].StringValue, 15);
 
     return SUCCESS;
 }
@@ -202,8 +273,11 @@ bool getRawPidValue(rtpApi obj, const char *pid, long long int *tmCount)
 {
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
-    HkTmDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
-    *tmCount = ptr->PrcOpBuf[apiStruct->pidMap[pid]].TmCount;
+    if (!apiStruct->isValidated)
+        return FAILURE;
+
+    TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
+    *tmCount = ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].TmCount;
 
     return SUCCESS;
 }

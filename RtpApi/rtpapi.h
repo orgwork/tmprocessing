@@ -17,16 +17,19 @@ rtpApi initRtpApi(char *scId, bool *ok, char *errMsg);
 bool deleteRtpApi(rtpApi obj);
 
 // Set Station Id -- eg: HSN, BLR
-bool setStationId(rtpApi obj, const char *stnId);
+bool setStationId(rtpApi obj, const char *stnId, char *errMsg);
 
 // Set TM Id -- eg: TM1, TM2
-bool setTmId(rtpApi obj, const char *tmId);
+bool setTmId(rtpApi obj, const char *tmId, char *errMsg);
 
 // Set OBC Id -- eg: MC1, MC2, MC3
-bool setObcId(rtpApi obj, const char *obcId);
+bool setObcId(rtpApi obj, const char *obcId, char *errMsg);
+
+// Validate the details provided
+bool validate(rtpApi obj, char *errMsg);
 
 // Get PID Values -- Processed real value, Processed string value, TM Raw Count
-bool getPidValue(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long *tmCount);
+bool getPidVal(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long *tmCount);
 
 // Get PID Values -- Processed real value
 bool getRealPidValue(rtpApi obj, const char *pid, double *realValue);

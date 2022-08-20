@@ -5,7 +5,8 @@
 #include <../includes/GlobalMacros.h>
 #include <../includes/MqBufDefs.h>
 #include <../includes/HkTmShmBuf.h>
-#include <../CommonClasses/Configuration.h>
+#include <../CommonClasses/TMConfiguration.h>
+#include "TMDatabase.h"
 
 struct threadData
 {
@@ -14,14 +15,15 @@ struct threadData
     sem_t dataEmpty;
     sem_t dataFilled;
     queue<AcqToProcMqBufDef> packets;
-    HkTmDataBufDef *ptrHkTmDataBuf;
+    TmOpDataBufDef *ptrHkTmDataBuf;
+    TMDatabase *db;
     exception_ptr teptr;
 };
 
 class ThreadSpawner
 {
 public:
-    ThreadSpawner(string scid, string MsgQIdentifier);
+    ThreadSpawner(string scId, string MsgQIdentifier);
 
     bool Init(string &errMsg);
     bool AttachToShmSegments(string &errMsg);
@@ -29,14 +31,14 @@ public:
     bool StartProcessing(string &errMsg);
 
 private:
-    Configuration config;
-    string scid;
+    TMConfiguration config;
+    string scId;
     string MsgQIdentifier;
     bool isAppRunning;
     map<string, threadData *> threadMap;
     mutex printMutex;
     int64_t counter;
-
+    TMDatabase hkTMDB;
 
     void WorkerThread(threadData *threadInfo);
     void SendNewFrameToWorkerThread(string identifier, AcqToProcMqBufDef message);

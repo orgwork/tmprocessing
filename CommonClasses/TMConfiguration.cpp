@@ -1,14 +1,14 @@
-#include "Configuration.h"
+#include "TMConfiguration.h"
 
 
-Configuration::Configuration(string scid)
+TMConfiguration::TMConfiguration(string scid)
 {
     this->scid = scid;
 }
 
 
 // Reads all Config files and stores in maps
-bool Configuration::readAllConfigFiles(string &errMsg)
+bool TMConfiguration::readAllConfigFiles(string &errMsg)
 {
 
     // Reads GlbTmMsgQList Config file
@@ -24,7 +24,7 @@ bool Configuration::readAllConfigFiles(string &errMsg)
 
 
 // Reads GlbTmMsgQList Config file and stores in a map
-bool Configuration::readGlbTmMsgQListConfig(string &errMsg)
+bool TMConfiguration::readGlbTmMsgQListConfig(string &errMsg)
 {
     try
     {
@@ -96,7 +96,7 @@ bool Configuration::readGlbTmMsgQListConfig(string &errMsg)
 
 
 // Reads TMOutputShmSegments Config file and stores in a map
-bool Configuration::readTmOpShmSegConfig(string &errMsg)
+bool TMConfiguration::readTmOpShmSegConfig(string &errMsg)
 {
     try
     {
@@ -183,7 +183,7 @@ bool Configuration::readTmOpShmSegConfig(string &errMsg)
 }
 
 
-int Configuration::getMessageQueueKey(string groupId, bool *ok)
+int TMConfiguration::getMessageQueueKey(string groupId, bool *ok)
 {
     bool isFound = false;
     if (this->grpMqKeyMap.count(groupId))
@@ -196,7 +196,7 @@ int Configuration::getMessageQueueKey(string groupId, bool *ok)
 }
 
 
-int Configuration::getShmKey(string stnId, string tmId, string obcId, bool *ok)
+int TMConfiguration::getShmKey(string stnId, string tmId, string obcId, bool *ok)
 {
     bool isFound = false;
     if (this->StnTmObcKeyMap.count(stnId))
@@ -215,7 +215,7 @@ int Configuration::getShmKey(string stnId, string tmId, string obcId, bool *ok)
 }
 
 
-int Configuration::getShmKey(string stnId, string tmId, bool *ok)
+int TMConfiguration::getShmKey(string stnId, string tmId, bool *ok)
 {
     bool isFound = false;
     if (this->StnTmKeyMap.count(stnId))
@@ -231,7 +231,7 @@ int Configuration::getShmKey(string stnId, string tmId, bool *ok)
 }
 
 
-vector<string> Configuration::getStationIds()
+vector<string> TMConfiguration::getStationIds()
 {
     vector<string> stationsList;
 
@@ -247,7 +247,7 @@ vector<string> Configuration::getStationIds()
 }
 
 
-vector<string> Configuration::getStationIds(string groupId, bool *ok)
+vector<string> TMConfiguration::getStationIds(string groupId, bool *ok)
 {
     bool isFound = false;
     if (this->grpStationsMap.count(groupId))
@@ -260,7 +260,7 @@ vector<string> Configuration::getStationIds(string groupId, bool *ok)
 }
 
 
-vector<string> Configuration::getTmIds(string stnId, bool *ok)
+vector<string> TMConfiguration::getTmIds(string stnId, bool *ok)
 {
     bool isFound = false;
     if (this->StnTmObcKeyMap.count(stnId))
@@ -292,7 +292,7 @@ vector<string> Configuration::getTmIds(string stnId, bool *ok)
 }
 
 
-bool Configuration::doesStnContainsMultiplexedData(string stnId)
+bool TMConfiguration::doesStnContainsMultiplexedData(string stnId)
 {
     if (this->StnTmObcKeyMap.count(stnId))
         return true;
@@ -301,7 +301,7 @@ bool Configuration::doesStnContainsMultiplexedData(string stnId)
 }
 
 
-bool Configuration::doesStnContainsNonMultiplexedData(string stnId)
+bool TMConfiguration::doesStnContainsNonMultiplexedData(string stnId)
 {
     if (this->StnTmKeyMap.count(stnId))
         return true;
@@ -310,7 +310,7 @@ bool Configuration::doesStnContainsNonMultiplexedData(string stnId)
 }
 
 
-bool Configuration::isMultiplexed(string stnId, string tmId)
+bool TMConfiguration::isMultiplexed(string stnId, string tmId)
 {
     if (this->StnTmObcKeyMap[stnId].count(tmId))
         return true;
@@ -319,7 +319,7 @@ bool Configuration::isMultiplexed(string stnId, string tmId)
 }
 
 
-vector<string> Configuration::getObcIds(string stnId, string tmId, bool *ok)
+vector<string> TMConfiguration::getObcIds(string stnId, string tmId, bool *ok)
 {
     bool isFound = false;
     if (this->StnTmObcKeyMap[stnId].count(tmId))
@@ -338,7 +338,7 @@ vector<string> Configuration::getObcIds(string stnId, string tmId, bool *ok)
 }
 
 
-bool Configuration::isValidStationId(string stnId)
+bool TMConfiguration::isValidStationId(string stnId)
 {
     if (this->StnTmObcKeyMap.count(stnId))
         return true;
@@ -350,7 +350,7 @@ bool Configuration::isValidStationId(string stnId)
 }
 
 
-bool Configuration::isValidTmId(string stnId, string tmId)
+bool TMConfiguration::isValidTmId(string stnId, string tmId)
 {
     if (this->StnTmObcKeyMap[stnId].count(tmId))
         return true;
@@ -362,7 +362,7 @@ bool Configuration::isValidTmId(string stnId, string tmId)
 }
 
 
-bool Configuration::isValidObcId(string stnId, string tmId, string obcId)
+bool TMConfiguration::isValidObcId(string stnId, string tmId, string obcId)
 {
     if (this->StnTmObcKeyMap[stnId][tmId].count(obcId))
         return true;

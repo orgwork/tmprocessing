@@ -1,7 +1,8 @@
 #include "ThreadSpawner.h"
 
-ThreadSpawner::ThreadSpawner(string scid, string MsgQIdentifier): config(scid)
+ThreadSpawner::ThreadSpawner(string scId, string MsgQIdentifier): config(scId)
 {
+    this->scId = scId;
     this->MsgQIdentifier = MsgQIdentifier;
     this->isAppRunning = true;
 }
@@ -59,6 +60,12 @@ bool ThreadSpawner::Init(string &errMsg)
         }
     }
 
+    if (hkTMDB.InitDatabase(scId, "HKTM") == false)
+    {
+        errMsg = "Database Initialisation Failure";
+        return FAILURE;
+    }
+
     return SUCCESS;
 }
 
@@ -78,7 +85,7 @@ bool ThreadSpawner::AttachToShmSegments(string &errMsg)
         if (shmid != -1)
         {
             //            Store Pointer of the shared memory
-            this->threadMap[identifier]->ptrHkTmDataBuf = (HkTmDataBufDef *)shmat(shmid, 0, 0);
+            this->threadMap[identifier]->ptrHkTmDataBuf = (TmOpDataBufDef *)shmat(shmid, 0, 0);
 
             if (this->threadMap[identifier]->ptrHkTmDataBuf  == (void *) -1)
             {
@@ -109,7 +116,7 @@ bool ThreadSpawner::SpawnThreads(string &errMsg)
         sem_init(&td->dataEmpty, 0, 10);
         sem_init(&td->dataFilled, 0, 0);
 
-        //        Create a thread and pass the stream thread information to the thread
+        // Create a thread and pass the stream thread information to the thread
         thread *newThread = new thread(&ThreadSpawner::WorkerThread, this, td);
     }
 
@@ -120,12 +127,6 @@ bool ThreadSpawner::SpawnThreads(string &errMsg)
 //  Worker thread for handling the message
 void ThreadSpawner::WorkerThread(threadData *threadInfo)
 {
-    int count = 0;
-
-    string tmOpFileName = "/tmp/" + threadInfo->threadId + "dump.dat";
-
-    ofstream tmop_file(tmOpFileName);
-
     try
     {
         while (isAppRunning)
@@ -133,33 +134,15 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
             //  wait until new message packet arrives
             sem_wait(&threadInfo->dataFilled);
 
-            count++;
             short frameId = threadInfo->packets.front().OneTmFrame[10 + 8] & 0x1f;
 
-            //            std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
-            //            for (int i = 0; i < IMXPID; i++)
-            //            {
-            //                for (int j = 0; j < MAXFRAMECOUNT; j++)
-            //                {
-
-            //                    memcpy(threadInfo->ptrHkTmDataBuf->PrcOpBuf[i].RawHkTmMasterFrame[j], threadInfo->packets.front().OneTmFrame, 256);
-
-            //                }
-            //            }
-
-            //            std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-            //            std::cout << "Time for writing data = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[us]" << std::endl;
-
-            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId], threadInfo->packets.front().OneTmFrame, 256);
+            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, threadInfo->packets.front().OneTmFrame, 256);
 
             threadInfo->ptrHkTmDataBuf->LatestFrameId = frameId;
 
             printMutex.lock();
             cout << "Thread Id: " << threadInfo->threadId << "  " << frameId << endl;
-            //            cout << counter++ << endl;
             printMutex.unlock();
-
-            tmop_file << count << " " << frameId << endl ;
 
             threadInfo->packets.pop();
 
@@ -172,7 +155,6 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
         cout << e.what() << endl;
         sem_post(&threadInfo->dataEmpty);
     }
-
 }
 
 

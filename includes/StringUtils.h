@@ -82,6 +82,12 @@ inline int toInt(string str)
     return std::stoi(str);
 }
 
+// Convert Hex string to int
+inline int hexToInt(string str)
+{
+    return (int)strtol(str.c_str(), NULL, 16);
+}
+
 }
 
 #endif // STRINGUTILS_H

@@ -7,14 +7,9 @@
 #define SUCCESS true
 #define FAILURE false
 
-#define HKTM 1
-#define DWL  2
-#define CTM  3
-#define BOOT 4
-
 
 #define IMXPID 20000
-#define MAXCHARVALFORPID 15
+#define MAXCHARVALFORPID 14
 #define MAX_STNS 2
 #define MAX_STREAMS 2
 #define MAXFRAMECOUNT 64
@@ -22,8 +17,8 @@
 #define MAX_OBC 2
 #define MAX_MQ 5
 #define DATALENGTH 264
-#define MAXPIDLEN 30
-
+#define MAXPIDLEN 10
+#define TM_RESP_BUF_SIZE 256
 
 
 #endif

@@ -1,15 +1,15 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef TMCONFIGURATION_H
+#define TMCONFIGURATION_H
 
 
 #include "../includes/SystemFiles.h"
 #include "../includes/GlobalMacros.h"
 #include "../includes/StringUtils.h"
 
-class Configuration
+class TMConfiguration
 {
 public:
-    Configuration(string scid);
+    TMConfiguration(string scid);
 
     bool readAllConfigFiles(string &errMsg);
     bool readGlbTmMsgQListConfig(string &errMsg);
@@ -42,4 +42,4 @@ private:
     bool doesStnContainsNonMultiplexedData(string stnId);
 };
 
-#endif // CONFIGURATION_H
+#endif // TMCONFIGURATION_H

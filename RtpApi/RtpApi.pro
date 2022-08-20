@@ -6,12 +6,15 @@ CONFIG += c++11
 
 CONFIG += staticlib
 
+QMAKE_CC = gcc
+QMAKE_CXX = gcc
+
 SOURCES += \
-    ../CommonClasses/Configuration.cpp \
+    ../CommonClasses/TMConfiguration.cpp \
     rtpapi.cpp
 
 HEADERS += \
-    ../CommonClasses/Configuration.h \
+    ../CommonClasses/TMConfiguration.h \
     rtpapi.h \
     rtpapi.hpp
 
