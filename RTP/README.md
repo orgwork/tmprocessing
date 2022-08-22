@@ -28,3 +28,4 @@ BAT_CHRG_CUR_TCR_NSEL_RT
 
 8. using pidsincurframe api function, frame_id is coming only in even frame numbers ie, 0,2,4,...30
 
+9. SSR-2_SW_SCRUB_PTR variable address not populated properly

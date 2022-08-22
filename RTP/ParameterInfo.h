@@ -8,24 +8,25 @@
 
 enum ConditionType
 {
-    OnOtherParams = 1,
-    OnSingleValue = 2,
-    OnValueRange = 3
+	OnOtherParams = 1,
+	OnSingleValue = 2,
+	OnValueRange  = 3
 };
 
 
 enum ParameterType
 {
-    POLYNOMIAL,
-    DIGITAL,
-    RADIX,
-    LUT
+	POLYNOMIAL,
+	DIGITAL,
+	RADIX,
+	LUT
 };
+
 
 enum DisplayFormat
 {
-    DECIMAL,
-    HEXADECIMAL,
+	DECIMAL,
+	HEXADECIMAL,
 };
 
 
@@ -33,25 +34,23 @@ class ParameterInfo
 {
 
 public:
-    ParameterInfo();
+	ParameterInfo();
 
-    string cdbPid;
-    string mnemonic;
-    int16_t pidIndex;
-    ProcessingType procType;
-    DataType dataType;
-    ParameterType paramType;
-    DisplayFormat displayFormat;
-    map<uint8_t, vector<Sample> > frameIdSamplesMap;
+	string			 cdbPid;
+	string			 mnemonic;
+	int16_t			 pidIndex;
+	ProcessingType	 procType;
+	DataType		 dataType;
+	ParameterType	 paramType;
+	DisplayFormat	 displayFormat;
+	bool			 isDerivedParam;
+	bool			 isConditional;
+	ConditionType	 condType;
+	map<int, string> digitalStatusMap;
+	uint8_t			 polynomialDegree;
+	double_t		 *coefficientList; // 0 - x^0 = 1 ie, Constant // 1 - x // 2 - x^2  // 3 - x^3
 
-    bool isDerivedParam;
-    bool isConditional;
-    ConditionType condType;
-
-    map<int, string> digitalStatusMap;
-
-    uint8_t polynomialDegree;
-    double_t *coefficientList;   // 0 - x^0 = 1 ie, Constant // 1 - x // 2 - x^2  // 3 - x^3
+	map<uint8_t, vector<Sample>> frameIdSamplesMap;
 };
 
 #endif // PARAMETERINFO_H
