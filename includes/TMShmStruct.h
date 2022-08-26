@@ -91,8 +91,6 @@
         uint8_t expression[MAXEXPLEN]; //derived        
     };
 
-    
-    
     struct conditionInfo
     {
        uint8_t 	cdbPid[MAXPIDLEN]; //direct

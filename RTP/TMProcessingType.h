@@ -2,6 +2,7 @@
 #define TMPROCESSINGTYPE_H
 
 #include "../includes/SystemFiles.h"
+#include "../includes/StringUtils.h"
 
 enum ProcessingType
 {
@@ -42,8 +43,7 @@ public:
     TMProcessingType();
 
     double getPolynomialValue(double *coeffs, uint8_t degree, double tmc);
-    //    char *getDigitalStatus(map<int, string> digitalStatusMap, int tmc);
-    //    char *getRadixValue();
+    string getRadixValue(int radixBase, double tmc);
 };
 
 #endif // TMPROCESSINGTYPE_H

@@ -5,6 +5,8 @@ ThreadSpawner::ThreadSpawner(string scId, string MsgQIdentifier): config(scId)
     this->scId = scId;
     this->MsgQIdentifier = MsgQIdentifier;
     this->isAppRunning = true;
+
+    this->hkTMDB = new TMDatabase;
 }
 
 
@@ -60,7 +62,7 @@ bool ThreadSpawner::Init(string &errMsg)
         }
     }
 
-    if (hkTMDB.InitDatabase(scId, "HKTM") == false)
+    if (hkTMDB->InitDatabase(scId, "HKTM") == false)
     {
         errMsg = "Database Initialisation Failure";
         return FAILURE;
@@ -129,20 +131,42 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
 {
     try
     {
+        bool retSts = FAILURE;
+        string errMsg = "";
+
+        TMProcessor tmProcessor(scId, "HKTM");
+
+        tmProcessor.SetTMDatabase(hkTMDB);
+        tmProcessor.SetSharedMemoryPointer(threadInfo->ptrHkTmDataBuf);
+
+        retSts = tmProcessor.InitTMProcessor(errMsg);
+        if (retSts == FAILURE)
+        {
+            cout << errMsg << endl;
+            return;
+        }
+
         while (isAppRunning)
         {
             //  wait until new message packet arrives
             sem_wait(&threadInfo->dataFilled);
 
-            short frameId = threadInfo->packets.front().OneTmFrame[10 + 8] & 0x1f;
+            short frameId = threadInfo->packets.front().CortexData[10] & 0x1f;
 
-            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, threadInfo->packets.front().OneTmFrame, 256);
+            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, &threadInfo->packets.front().CortexData, 256);
+
+            tmProcessor.ProcessFrame((char *)threadInfo->packets.front().CortexData);
 
             threadInfo->ptrHkTmDataBuf->LatestFrameId = frameId;
 
-            printMutex.lock();
-            cout << "Thread Id: " << threadInfo->threadId << "  " << frameId << endl;
-            printMutex.unlock();
+            //            for (int i = 0; i < 256; i++)
+            //                printf(" %02X ", threadInfo->packets.front().CortexData[i]);
+
+            //            cout << endl;
+
+            //            printMutex.lock();
+            //            cout << "Thread Id: " << threadInfo->threadId << "  " << frameId << endl;
+            //            printMutex.unlock();
 
             threadInfo->packets.pop();
 
@@ -175,32 +199,35 @@ bool ThreadSpawner::StartProcessing(string &errMsg)
 
     while (msgrcv(msgQId, &message, sizeof (message), 0, 0))
     {
-        int tmId = (message.OneTmFrame[10 + 8] & 0x20) >> 5;
+        TMPacketStructure tmPkt;
+
+        memcpy(&tmPkt, message.OneTmFrame, DATALENGTH);
+
+        int tmId = (tmPkt.CortexData[10] & 0x20) >> 5;
 
         string identifier, tmType;
-        char stnId[5];
+        //        char stnId[5];
 
         if (tmId == 0)
             tmType = "HKTM1";
         else
             tmType = "HKTM2";
 
-        memcpy(stnId, message.OneTmFrame, 4);
-        stnId[4] = '\0';
+        //        memcpy(stnId, message.OneTmFrame, 4);
+        //        stnId[4] = '\0';
 
-        identifier = string(stnId) + ":" + tmType;
-        this->SendNewFrameToWorkerThread(identifier, message);
+        identifier =  "STN1:" + tmType;
+        this->SendNewFrameToWorkerThread(identifier, tmPkt);
 
         identifier = "ALL:" + tmType;
-        this->SendNewFrameToWorkerThread(identifier, message);
-
+        this->SendNewFrameToWorkerThread(identifier, tmPkt);
     }
 
     return SUCCESS;
 }
 
 
-void ThreadSpawner::SendNewFrameToWorkerThread(string identifier, AcqToProcMqBufDef message)
+void ThreadSpawner::SendNewFrameToWorkerThread(string identifier, TMPacketStructure message)
 {
     threadData *td = threadMap[identifier];
 

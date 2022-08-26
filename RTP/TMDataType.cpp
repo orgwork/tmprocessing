@@ -1,30 +1,29 @@
 #include "TMDataType.h"
 
 
-uint32_t TMDataType::getUInt32(vector<uint8_t *> &frames, Sample &sample)
+uint32_t TMDataType::getUInt32(Sample &sample)
 {
     uint32_t result = 0;
     uint8_t numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
-        uint8_t *frame = frames.at(i);
+        uint16_t frameId = sample.frameIdList.at(i);
+
         Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
+
+        uint8_t bytePos = address.wordNo;
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
+        uint8_t mask = 0x00;
+
+        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
-            uint8_t bytePos = address.bytes.at(j).Pos;
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
-
-            uint8_t byte = frame[bytePos];
-            uint8_t mask = 0x00;
-
-            for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+            switch (bitPos)
             {
-                switch (bitPos)
-                {
                 case 0:
                     mask = 0x80;
                     break;
@@ -49,15 +48,12 @@ uint32_t TMDataType::getUInt32(vector<uint8_t *> &frames, Sample &sample)
                 case 7:
                     mask = 0x01;
                     break;
-                }
-
-                if ( byte & mask )
-                    result |= ((uint32_t)0x0001 << numOfBits);
-
-                numOfBits++;
-
-                if (numOfBits == 32) break;
             }
+
+            if ( byte & mask )
+                result |= ((uint32_t)0x0001 << numOfBits);
+
+            numOfBits++;
 
             if (numOfBits == 32) break;
         }
@@ -69,30 +65,29 @@ uint32_t TMDataType::getUInt32(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-uint64_t TMDataType::getUInt64(vector<uint8_t *> &frames, Sample &sample)
+uint64_t TMDataType::getUInt64(Sample &sample)
 {
     uint64_t result = 0;
     uint8_t numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
-        uint8_t *frame = frames.at(i);
+        uint16_t frameId = sample.frameIdList.at(i);
+
         Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
+
+        uint8_t bytePos = address.wordNo;
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
+        uint8_t mask = 0x00;
+
+        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
-            uint8_t bytePos = address.bytes.at(j).Pos;
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
-
-            uint8_t byte = frame[bytePos];
-            uint8_t mask = 0x00;
-
-            for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+            switch (bitPos)
             {
-                switch (bitPos)
-                {
                 case 0:
                     mask = 0x80;
                     break;
@@ -117,15 +112,12 @@ uint64_t TMDataType::getUInt64(vector<uint8_t *> &frames, Sample &sample)
                 case 7:
                     mask = 0x01;
                     break;
-                }
-
-                if ( byte & mask )
-                    result |= ((uint64_t)0x0001 << numOfBits);
-
-                numOfBits++;
-
-                if (numOfBits == 64) break;
             }
+
+            if ( byte & mask )
+                result |= ((uint64_t)0x0001 << numOfBits);
+
+            numOfBits++;
 
             if (numOfBits == 64) break;
         }
@@ -137,30 +129,29 @@ uint64_t TMDataType::getUInt64(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-int32_t TMDataType::getInt32(vector<uint8_t *> &frames, Sample &sample)
+int32_t TMDataType::getInt32(Sample &sample)
 {
     int32_t result = 0;
     uint8_t numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
-        uint8_t *frame = frames.at(i);
+        uint16_t frameId = sample.frameIdList.at(i);
+
         Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
+
+        uint8_t bytePos = address.wordNo;
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
+        uint8_t mask = 0x00;
+
+        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
-            uint8_t bytePos = address.bytes.at(j).Pos;
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
-
-            uint8_t byte = frame[bytePos];
-            uint8_t mask = 0x00;
-
-            for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+            switch (bitPos)
             {
-                switch (bitPos)
-                {
                 case 0:
                     mask = 0x80;
                     break;
@@ -185,15 +176,12 @@ int32_t TMDataType::getInt32(vector<uint8_t *> &frames, Sample &sample)
                 case 7:
                     mask = 0x01;
                     break;
-                }
-
-                if ( byte & mask )
-                    result |= ((uint32_t)0x0001 << numOfBits);
-
-                numOfBits++;
-
-                if (numOfBits == 32) break;
             }
+
+            if ( byte & mask )
+                result |= ((uint32_t)0x0001 << numOfBits);
+
+            numOfBits++;
 
             if (numOfBits == 32) break;
         }
@@ -205,30 +193,29 @@ int32_t TMDataType::getInt32(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-int64_t TMDataType::getInt64(vector<uint8_t *> &frames, Sample &sample)
+int64_t TMDataType::getInt64(Sample &sample)
 {
     int64_t result = 0;
     uint8_t numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
-        uint8_t *frame = frames.at(i);
-        Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
+        uint16_t frameId = sample.frameIdList[i];
+
+        Address address = sample.addressList[i];
+
+        uint8_t bytePos = address.wordNo;
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
+        uint8_t mask;
+
+        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
-            uint8_t bytePos = address.bytes.at(j).Pos;
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
-
-            uint8_t byte = frame[bytePos];
-            uint8_t mask = 0x00;
-
-            for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+            switch (bitPos)
             {
-                switch (bitPos)
-                {
                 case 0:
                     mask = 0x80;
                     break;
@@ -253,15 +240,12 @@ int64_t TMDataType::getInt64(vector<uint8_t *> &frames, Sample &sample)
                 case 7:
                     mask = 0x01;
                     break;
-                }
-
-                if ( byte & mask )
-                    result |= ((uint64_t)0x0001 << numOfBits);
-
-                numOfBits++;
-
-                if (numOfBits == 64) break;
             }
+
+            if ( byte & mask )
+                result |= ((uint64_t)0x0001 << numOfBits);
+
+            numOfBits++;
 
             if (numOfBits == 64) break;
         }
@@ -273,26 +257,23 @@ int64_t TMDataType::getInt64(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-int64_t TMDataType::getTwosComplement(vector<uint8_t *> &frames, Sample &sample)
+int64_t TMDataType::getTwosComplement(Sample &sample)
 {
     int numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
-        {
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
 
-            numOfBits = numOfBits + endBitPos - startBitPos + 1;
-        }
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        numOfBits = numOfBits + endBitPos - startBitPos + 1;
     }
 
     int64_t maxValue = pow(2, numOfBits);
-    int64_t normalValue = getInt64(frames, sample);
+    int64_t normalValue = getInt64(sample);
 
     int64_t result = (normalValue < maxValue / 2) ? normalValue : -(maxValue - normalValue);
 
@@ -300,35 +281,33 @@ int64_t TMDataType::getTwosComplement(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-int64_t TMDataType::getOnesComplement(vector<uint8_t *> &frames, Sample &sample)
+int64_t TMDataType::getOnesComplement(Sample &sample)
 {
     int numOfBits = 0;
 
-    size_t numOfFrames = frames.size();
+    size_t numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         Address address = sample.addressList.at(i);
-        size_t numOfBytes = address.bytes.size();
-        for (int j = numOfBytes - 1; j >= 0; j--)
-        {
-            uint8_t startBitPos = address.bytes.at(j).startBitPos;
-            uint8_t endBitPos = address.bytes.at(j).endBitPos;
 
-            numOfBits = numOfBits + endBitPos - startBitPos + 1;
-        }
+        uint8_t startBitPos = address.startBitPos;
+        uint8_t endBitPos = address.endBitPos;
+
+        numOfBits = numOfBits + endBitPos - startBitPos + 1;
     }
 
     int64_t maxValue = pow(2, numOfBits);
-    int64_t normalValue = getInt64(frames, sample);
+    int64_t normalValue = getInt64(sample);
 
     int64_t result = (normalValue < maxValue / 2) ? normalValue : -((maxValue - 1) - normalValue);
 
     return result;
 }
 
-int64_t TMDataType::getGray2Bin(vector<uint8_t *> &frames, Sample &sample)
+
+int64_t TMDataType::getGray2Bin(Sample &sample)
 {
-    int64_t n = getInt64(frames, sample);
+    int64_t n = getInt64(sample);
     int64_t result = 0;
 
     for (; n != 0; n = n >> 1)
@@ -338,32 +317,32 @@ int64_t TMDataType::getGray2Bin(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-float TMDataType::getIEEE32Float(vector<uint8_t *> &frames, Sample &sample)
+float TMDataType::getIEEE32Float(Sample &sample)
 {
     u32f result;
 
-    result.intValue = getUInt32(frames, sample);
+    result.intValue = getUInt32(sample);
 
     return  result.floatValue;
 }
 
 
-double TMDataType::getIEEE64Float(vector<uint8_t *> &frames, Sample &sample)
+double TMDataType::getIEEE64Float(Sample &sample)
 {
     u64d result;
 
-    result.intValue = getUInt64(frames, sample);
+    result.intValue = getUInt64(sample);
 
     return  result.doubleValue;
 }
 
 
-float TMDataType::get1750A32Float(vector<uint8_t *> &frames, Sample &sample)
+float TMDataType::get1750A32Float(Sample &sample)
 {
     int64_t mantissa = 0;
     int64_t exp = 0;
 
-    uint32_t intbits = getUInt32(frames, sample);
+    uint32_t intbits = getUInt32(sample);
 
     uint16_t buffer[6] ;
     buffer[0] = uint16_t ((intbits & 0xFF000000) >> 24 );
@@ -399,12 +378,12 @@ float TMDataType::get1750A32Float(vector<uint8_t *> &frames, Sample &sample)
 }
 
 
-double TMDataType::get1750A48Float(vector<uint8_t *> &frames, Sample &sample)
+double TMDataType::get1750A48Float(Sample &sample)
 {
     int64_t mantissa = 0;
     int64_t exp = 0;
 
-    uint64_t longbits = getUInt64(frames, sample);
+    uint64_t longbits = getUInt64(sample);
 
     uint16_t buffer[6] ;
     buffer[0] = uint16_t ((longbits & 0xFF0000000000) >> 40 );

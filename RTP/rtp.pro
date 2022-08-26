@@ -7,9 +7,9 @@ SOURCES += \
         ../CommonClasses/TMConfiguration.cpp \
         MasterFrame.cpp \
         ParameterInfo.cpp \
+        ProcessParameters.cpp \
         TMDataType.cpp \
         TMDatabase.cpp \
-        TMFormatInfo.cpp \
         TMProcessingType.cpp \
         TMProcessor.cpp \
         ThreadSpawner.cpp \
@@ -19,9 +19,9 @@ HEADERS += \
     ../CommonClasses/TMConfiguration.h \
     MasterFrame.h \
     ParameterInfo.h \
+    ProcessParameters.h \
     TMDataType.h \
     TMDatabase.h \
-    TMFormatInfo.h \
     TMProcessingType.h \
     TMProcessor.hpp \
     ThreadSpawner.h \

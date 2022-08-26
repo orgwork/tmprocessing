@@ -10,18 +10,21 @@ struct AcqToProcMqBufDef
 };
 
 
-struct TMPacketStructure{
-    unsigned char StnCode[2];
+struct TMPacketStructure
+{
+    unsigned char StnCode;
     unsigned char SatCode[2];
-    unsigned char DataType[2];
-    unsigned char TMSource[2];
-    unsigned char ReceivedTime[8];
-    unsigned char DerivedTime[8];
-    unsigned char DataQuality[2];
-    unsigned char BitRate[2];
-    unsigned char CodingStatus[2];
-    unsigned char SecureNode[2];
+    unsigned char DataType;
+    unsigned char TMSource;
+    unsigned char ReceivedTime[10];
+    unsigned char DerivedTime[10];
+    unsigned char DataQuality;
+    unsigned char BitRate;
+    unsigned char CodingStatus;
+    unsigned char SecureNode;
+    unsigned char CortexHeader[64];
     unsigned char CortexData[TM_RESP_BUF_SIZE];
+    unsigned char CortexTail[4];
 };
 
 #endif

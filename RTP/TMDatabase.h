@@ -26,8 +26,8 @@ class TMDatabase
 public:
     TMDatabase();
 
-    map<int, vector<ParameterInfo>> framePidsMap;
-    map<string, uint16_t>           pidIndexMap;
+    map<int, vector<int>> frameIdPidIndexListMap;
+    ParameterInfo *pidIndexParameterMap[MAXPID];
 
     bool InitDatabase(string scId, string tmFormatId);
     bool LoadParameter(string pid);

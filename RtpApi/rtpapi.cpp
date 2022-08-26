@@ -209,11 +209,16 @@ bool validate(rtpApi obj, char *errMsg)
         return FAILURE;
     }
 
-    if (!apiStruct->config.isValidObcId(apiStruct->stnId, apiStruct->tmId, apiStruct->obcId))
+
+    if (apiStruct->config.isMultiplexed(apiStruct->stnId, apiStruct->tmId))
     {
-        strncpy(errMsg, "INVALID OBC-ID", 500);
-        return FAILURE;
+        if (!apiStruct->config.isValidObcId(apiStruct->stnId, apiStruct->tmId, apiStruct->obcId))
+        {
+            strncpy(errMsg, "INVALID OBC-ID", 500);
+            return FAILURE;
+        }
     }
+
 
     apiStruct->isValidated = true;
 

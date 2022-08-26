@@ -2,6 +2,7 @@
 #define TMDATATYPE_H
 
 #include "../includes/SystemFiles.h"
+#include "MasterFrame.h"
 
 enum DataType
 {
@@ -16,23 +17,17 @@ enum DataType
 };
 
 
-struct Byte
+struct Address
 {
-    uint8_t Pos;
+    uint16_t frameId;
+    uint16_t wordNo; // starts from 0
     uint8_t startBitPos;
     uint8_t endBitPos;
 };
 
-
-struct Address
-{
-    vector<Byte> bytes;
-};
-
-
 struct Sample
 {
-    vector<uint8_t> frameNumbers;
+    vector<uint16_t> frameIdList;
     vector<Address> addressList;
 };
 
@@ -56,30 +51,30 @@ class TMDataType
 
 public:
 
-    u_int64_t getUInt64(vector<uint8_t *> &frames, Sample &sample);
+    u_int64_t getUInt64(Sample &sample);
 
-    int64_t getInt64(vector<uint8_t *> &frames, Sample &sample);
+    int64_t getInt64(Sample &sample);
 
-    int64_t getTwosComplement(vector<uint8_t *> &frames, Sample &sample);
+    int64_t getTwosComplement(Sample &sample);
 
-    int64_t getOnesComplement(vector<uint8_t *> &frames, Sample &sample);
+    int64_t getOnesComplement(Sample &sample);
 
-    int64_t getGray2Bin(vector<uint8_t *> &frames, Sample &sample);
+    int64_t getGray2Bin(Sample &sample);
 
-    float getIEEE32Float(vector<uint8_t *> &frames, Sample &sample);
+    float getIEEE32Float(Sample &sample);
 
-    double getIEEE64Float(vector<uint8_t *> &frames, Sample &sample);
+    double getIEEE64Float(Sample &sample);
 
-    float get1750A32Float(vector<uint8_t *> &frames, Sample &sample);
+    float get1750A32Float(Sample &sample);
 
-    double get1750A48Float(vector<uint8_t *> &frames, Sample &sample);
+    double get1750A48Float(Sample &sample);
+
+    MasterFrame *masterFrame;
 
 private:
-    int32_t getInt32(vector<uint8_t *> &frames, Sample &sample);
+    int32_t getInt32(Sample &sample);
 
-    u_int32_t getUInt32(vector<uint8_t *> &frames, Sample &sample);
-
-
+    u_int32_t getUInt32(Sample &sample);
 
 };
 

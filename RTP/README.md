@@ -5,6 +5,8 @@
 But the total number of parameters present in this format may be less than 500.
 Deriving a new index helps in reducing the size of shared memory.
 
+2. if there is no fixed sampling rate?
+
 
 # DB Issues
 1. getNumPidsInCurFrm int initializing with 0
@@ -17,7 +19,7 @@ CAL_POS_VOL_SEL_RT
 0		5.39199e+67
 1		0.039063
 
-
+BUS_LOAD_CUR_LR_SEL_RT
 BAT_CHRG_CUR_TCR_NSEL_RT
 0		5.39199e+67
 1		0.09274
@@ -29,3 +31,7 @@ BAT_CHRG_CUR_TCR_NSEL_RT
 8. using pidsincurframe api function, frame_id is coming only in even frame numbers ie, 0,2,4,...30
 
 9. SSR-2_SW_SCRUB_PTR variable address not populated properly
+
+10. ID_AIU - sampling rate = 0
+
+11. BOOT & CTM parameters present in NorTM formatId

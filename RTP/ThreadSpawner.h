@@ -7,6 +7,7 @@
 #include <../includes/HkTmShmBuf.h>
 #include <../CommonClasses/TMConfiguration.h>
 #include "TMDatabase.h"
+#include "TMProcessor.hpp"
 
 struct threadData
 {
@@ -14,7 +15,7 @@ struct threadData
     string threadId;
     sem_t dataEmpty;
     sem_t dataFilled;
-    queue<AcqToProcMqBufDef> packets;
+    queue<TMPacketStructure> packets;
     TmOpDataBufDef *ptrHkTmDataBuf;
     TMDatabase *db;
     exception_ptr teptr;
@@ -38,10 +39,10 @@ private:
     map<string, threadData *> threadMap;
     mutex printMutex;
     int64_t counter;
-    TMDatabase hkTMDB;
+    TMDatabase *hkTMDB;
 
     void WorkerThread(threadData *threadInfo);
-    void SendNewFrameToWorkerThread(string identifier, AcqToProcMqBufDef message);
+    void SendNewFrameToWorkerThread(string identifier, TMPacketStructure message);
 
 };
 
