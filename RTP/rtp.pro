@@ -3,6 +3,12 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+
+QMAKE_LFLAGS_RELEASE -= -Wl,-O1
+QMAKE_LFLAGS_RELEASE += -O3
+
 SOURCES += \
         ../CommonClasses/TMConfiguration.cpp \
         MasterFrame.cpp \

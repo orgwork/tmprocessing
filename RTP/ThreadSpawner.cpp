@@ -151,20 +151,32 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
             //  wait until new message packet arrives
             sem_wait(&threadInfo->dataFilled);
 
-            short frameId = threadInfo->packets.front().CortexData[10] & 0x1f;
+            TMPacketStructure tmPkt = threadInfo->packets.front();
 
-            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, &threadInfo->packets.front().CortexData, 256);
+            short frameId = tmPkt.CortexData[10] & 0x1f;
 
-            tmProcessor.ProcessFrame((char *)threadInfo->packets.front().CortexData);
+            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, &tmPkt.CortexData, 256);
+
+            tmProcessor.ProcessFrame((char *)tmPkt.CortexData);
 
             threadInfo->ptrHkTmDataBuf->LatestFrameId = frameId;
 
+
+            //            printMutex.lock();
             //            for (int i = 0; i < 256; i++)
-            //                printf(" %02X ", threadInfo->packets.front().CortexData[i]);
+            //                printf(" %02X ", tmPkt.CortexData[i]);
 
             //            cout << endl;
 
-            //            printMutex.lock();
+            //            printf("STN_Code: %02X \n", tmPkt.StnCode);
+            //            printf("DataType: %02X \n", tmPkt.DataType);
+            //            printf("TMSource: %02X \n", tmPkt.TMSource);
+
+            //            for (int i = 0; i < 10; i++)
+            //                printf("%02X ", tmPkt.ReceivedTime[i]);
+
+            //            cout << endl;
+
             //            cout << "Thread Id: " << threadInfo->threadId << "  " << frameId << endl;
             //            printMutex.unlock();
 
@@ -196,10 +208,10 @@ bool ThreadSpawner::StartProcessing(string &errMsg)
     }
 
     AcqToProcMqBufDef message;
+    TMPacketStructure tmPkt;
 
     while (msgrcv(msgQId, &message, sizeof (message), 0, 0))
     {
-        TMPacketStructure tmPkt;
 
         memcpy(&tmPkt, message.OneTmFrame, DATALENGTH);
 

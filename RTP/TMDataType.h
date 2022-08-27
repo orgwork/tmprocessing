@@ -21,8 +21,8 @@ struct Address
 {
     uint16_t frameId;
     uint16_t wordNo; // starts from 0
-    uint8_t startBitPos;
-    uint8_t endBitPos;
+    uint16_t startBitPos;
+    uint16_t endBitPos;
 };
 
 struct Sample

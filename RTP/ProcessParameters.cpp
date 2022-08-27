@@ -10,6 +10,9 @@ ProcessParameters::ProcessParameters()
 
 void ProcessParameters::ProcessFrame(char *rawFrame)
 {
+    //    struct timeval start, end;
+    //    gettimeofday(&start, NULL);
+
     auto startTime = chrono::high_resolution_clock::now();
 
     this->curFrameId =  masterFrame->updateFrame(rawFrame);
@@ -24,25 +27,28 @@ void ProcessParameters::ProcessFrame(char *rawFrame)
 
         ParameterInfo *parameter = tmdb->pidIndexParameterMap[pidIndex];
 
-        this->ProcessParameter(parameter);
+        UpdateRawValue(parameter);
+
+        if (pidIndex != 6079)
+            UpdateProcessedValue(parameter);
+
+        this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].TmCount = parameter->rawValue;
+        this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].RealValue = parameter->realValue;
+        strncpy(this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].StringValue, parameter->stringValue.c_str(), MAXCHARVALFORPID);
     }
 
     auto endTime = chrono::high_resolution_clock::now();
 
     cout << "Processed Frame: " << curFrameId << " with " << pidIndexListSize << " parameters in " << chrono::duration_cast<chrono::microseconds>(endTime - startTime).count() << " us" << endl;
-}
 
+    //    gettimeofday(&end, NULL);
 
-void ProcessParameters::ProcessParameter(ParameterInfo *parameter)
-{
-    UpdateRawValue(parameter);
+    //    long seconds = (end.tv_sec - start.tv_sec);
+    //    long microseconds = ((seconds * 1000000) + end.tv_usec) - start.tv_usec;
 
-    if (parameter->pidIndex != 6079)
-        UpdateProcessedValue(parameter);
+    //    printf("\n Elapsed Time: %ld us  \t Frame-Id: %d  \t  No. Of Params: %d \n", microseconds, curFrameId, pidIndexListSize);
+    //    cout << endl;
 
-    this->ptrTmOpDataBufDef->HkTmPrcOpBuf[parameter->pidIndex].TmCount = parameter->rawValue;
-    this->ptrTmOpDataBufDef->HkTmPrcOpBuf[parameter->pidIndex].RealValue = parameter->realValue;
-    strncpy(this->ptrTmOpDataBufDef->HkTmPrcOpBuf[parameter->pidIndex].StringValue, parameter->stringValue.c_str(), MAXCHARVALFORPID);
 }
 
 

@@ -7,6 +7,8 @@ Deriving a new index helps in reducing the size of shared memory.
 
 2. if there is no fixed sampling rate?
 
+3. If processing is killed abruptly, on restart, not able to receive messages
+
 
 # DB Issues
 1. getNumPidsInCurFrm int initializing with 0

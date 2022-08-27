@@ -53,8 +53,8 @@ public:
 
     Sample frameIdSamplesMap[32];
 
-    double rawValue = 0;
-    double realValue = 0;
+    double rawValue;
+    double realValue;
     string stringValue;
 };
 

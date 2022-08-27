@@ -4,23 +4,23 @@
 uint32_t TMDataType::getUInt32(Sample &sample)
 {
     uint32_t result = 0;
-    uint8_t numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         uint16_t frameId = sample.frameIdList.at(i);
 
         Address address = sample.addressList.at(i);
 
-        uint8_t bytePos = address.wordNo;
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t bytePos = address.wordNo;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
         uint8_t mask = 0x00;
 
-        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+        for (int bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
             switch (bitPos)
             {
@@ -54,11 +54,8 @@ uint32_t TMDataType::getUInt32(Sample &sample)
                 result |= ((uint32_t)0x0001 << numOfBits);
 
             numOfBits++;
-
-            if (numOfBits == 32) break;
         }
 
-        if (numOfBits == 32) break;
     }
 
     return result;
@@ -68,23 +65,23 @@ uint32_t TMDataType::getUInt32(Sample &sample)
 uint64_t TMDataType::getUInt64(Sample &sample)
 {
     uint64_t result = 0;
-    uint8_t numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         uint16_t frameId = sample.frameIdList.at(i);
 
         Address address = sample.addressList.at(i);
 
-        uint8_t bytePos = address.wordNo;
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t bytePos = address.wordNo;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
         uint8_t mask = 0x00;
 
-        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+        for (int bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
             switch (bitPos)
             {
@@ -119,10 +116,8 @@ uint64_t TMDataType::getUInt64(Sample &sample)
 
             numOfBits++;
 
-            if (numOfBits == 64) break;
         }
 
-        if (numOfBits == 64) break;
     }
 
     return result;
@@ -132,23 +127,23 @@ uint64_t TMDataType::getUInt64(Sample &sample)
 int32_t TMDataType::getInt32(Sample &sample)
 {
     int32_t result = 0;
-    uint8_t numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         uint16_t frameId = sample.frameIdList.at(i);
 
         Address address = sample.addressList.at(i);
 
-        uint8_t bytePos = address.wordNo;
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t bytePos = address.wordNo;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
         uint8_t mask = 0x00;
 
-        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+        for (int bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
             switch (bitPos)
             {
@@ -182,11 +177,7 @@ int32_t TMDataType::getInt32(Sample &sample)
                 result |= ((uint32_t)0x0001 << numOfBits);
 
             numOfBits++;
-
-            if (numOfBits == 32) break;
         }
-
-        if (numOfBits == 32) break;
     }
 
     return result;
@@ -196,23 +187,23 @@ int32_t TMDataType::getInt32(Sample &sample)
 int64_t TMDataType::getInt64(Sample &sample)
 {
     int64_t result = 0;
-    uint8_t numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         uint16_t frameId = sample.frameIdList[i];
 
         Address address = sample.addressList[i];
 
-        uint8_t bytePos = address.wordNo;
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t bytePos = address.wordNo;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         uint8_t byte = masterFrame->rawFrameMap[frameId][bytePos];
-        uint8_t mask;
+        uint8_t mask = 0x00;
 
-        for (uint8_t bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
+        for (int bitPos = endBitPos; bitPos >= startBitPos; bitPos--)
         {
             switch (bitPos)
             {
@@ -246,11 +237,7 @@ int64_t TMDataType::getInt64(Sample &sample)
                 result |= ((uint64_t)0x0001 << numOfBits);
 
             numOfBits++;
-
-            if (numOfBits == 64) break;
         }
-
-        if (numOfBits == 64) break;
     }
 
     return result;
@@ -259,15 +246,15 @@ int64_t TMDataType::getInt64(Sample &sample)
 
 int64_t TMDataType::getTwosComplement(Sample &sample)
 {
-    int numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         Address address = sample.addressList.at(i);
 
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         numOfBits = numOfBits + endBitPos - startBitPos + 1;
     }
@@ -283,15 +270,15 @@ int64_t TMDataType::getTwosComplement(Sample &sample)
 
 int64_t TMDataType::getOnesComplement(Sample &sample)
 {
-    int numOfBits = 0;
+    uint16_t numOfBits = 0;
 
-    size_t numOfFrames = sample.frameIdList.size();
+    int numOfFrames = sample.frameIdList.size();
     for (int i = numOfFrames - 1 ; i >= 0 ; i--)
     {
         Address address = sample.addressList.at(i);
 
-        uint8_t startBitPos = address.startBitPos;
-        uint8_t endBitPos = address.endBitPos;
+        uint16_t startBitPos = address.startBitPos;
+        uint16_t endBitPos = address.endBitPos;
 
         numOfBits = numOfBits + endBitPos - startBitPos + 1;
     }
@@ -417,14 +404,3 @@ double TMDataType::get1750A48Float(Sample &sample)
 
     return result;
 }
-
-
-
-
-
-
-
-
-
-
-

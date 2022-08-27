@@ -22,32 +22,26 @@ double TMProcessingType::getPolynomialValue(double *coeffs, uint8_t degree, doub
 
 
 
-string TMProcessingType::getRadixValue(int radixBase, double tmc)
+string TMProcessingType::getRadixValue(int radixBase, uint64_t tmc)
 {
     string result;
-    stringstream stream;
 
-    switch (radixBase)
+    char ascii[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    int i = 0, j, cnt;
+    char res1[20], res[20];
+    do
     {
-    case 16:
-        stream << std::hex << tmc;
-        result = stream.str();
-        break;
-
-    case 10:
-        stream << std::dec << tmc;
-        result = stream.str();
-        break;
-
-    case 8:
-        stream << std::oct << tmc;
-        result = stream.str();
-        break;
-
-    case 2:
-        result = bitset<64>(tmc).to_string();
-        break;
+        res1[i++] = ascii[(tmc % radixBase)];
+        tmc = (tmc / radixBase);
     }
+    while (tmc != 0);
+    res1[i] = '\0';
+    cnt = i;
+    for (i--, j = 0; j < cnt; j++, i--)
+        res[j] = res1[i];
+    res[j] = '\0';
+
+    result = res;
 
     return result;
 }

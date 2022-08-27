@@ -5,6 +5,7 @@
 #include "MasterFrame.h"
 #include "TMDataType.h"
 #include "../includes/HkTmShmBuf.h"
+#include <sys/time.h>
 
 class ProcessParameters
 {
@@ -12,7 +13,6 @@ public:
     ProcessParameters();
 
     void ProcessFrame(char *rawFrame);
-    void ProcessParameter(ParameterInfo *parameter);
     void UpdateRawValue(ParameterInfo *parameter);
     void UpdateProcessedValue(ParameterInfo *parameter);
 

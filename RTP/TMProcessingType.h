@@ -43,7 +43,7 @@ public:
     TMProcessingType();
 
     double getPolynomialValue(double *coeffs, uint8_t degree, double tmc);
-    string getRadixValue(int radixBase, double tmc);
+    string getRadixValue(int radixBase, uint64_t tmc);
 };
 
 #endif // TMPROCESSINGTYPE_H
