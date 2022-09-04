@@ -28,10 +28,13 @@ public:
 
     map<int, vector<int>> frameIdPidIndexListMap;
     ParameterInfo *pidIndexParameterMap[MAXPID];
+    map<string, int> pidIndexMap;
 
     bool InitDatabase(string scId, string tmFormatId);
-    bool LoadParameter(string pid);
+    bool LoadParameter(string paramId, string &errorMsg);
     void LoadAllParameterDetails();
+    bool RemoveParameter(string paramId, string &errorMsg);
+    void RemoveAllParameters();
 
 private:
     TMFormatId  tmFormatId;

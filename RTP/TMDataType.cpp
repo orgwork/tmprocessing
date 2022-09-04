@@ -24,30 +24,30 @@ uint32_t TMDataType::getUInt32(Sample &sample)
         {
             switch (bitPos)
             {
-                case 0:
-                    mask = 0x80;
-                    break;
-                case 1:
-                    mask = 0x40;
-                    break;
-                case 2:
-                    mask = 0x20;
-                    break;
-                case 3:
-                    mask = 0x10;
-                    break;
-                case 4:
-                    mask = 0x08;
-                    break;
-                case 5:
-                    mask = 0x04;
-                    break;
-                case 6:
-                    mask = 0x02;
-                    break;
-                case 7:
-                    mask = 0x01;
-                    break;
+            case 0:
+                mask = 0x80;
+                break;
+            case 1:
+                mask = 0x40;
+                break;
+            case 2:
+                mask = 0x20;
+                break;
+            case 3:
+                mask = 0x10;
+                break;
+            case 4:
+                mask = 0x08;
+                break;
+            case 5:
+                mask = 0x04;
+                break;
+            case 6:
+                mask = 0x02;
+                break;
+            case 7:
+                mask = 0x01;
+                break;
             }
 
             if ( byte & mask )
@@ -85,30 +85,30 @@ uint64_t TMDataType::getUInt64(Sample &sample)
         {
             switch (bitPos)
             {
-                case 0:
-                    mask = 0x80;
-                    break;
-                case 1:
-                    mask = 0x40;
-                    break;
-                case 2:
-                    mask = 0x20;
-                    break;
-                case 3:
-                    mask = 0x10;
-                    break;
-                case 4:
-                    mask = 0x08;
-                    break;
-                case 5:
-                    mask = 0x04;
-                    break;
-                case 6:
-                    mask = 0x02;
-                    break;
-                case 7:
-                    mask = 0x01;
-                    break;
+            case 0:
+                mask = 0x80;
+                break;
+            case 1:
+                mask = 0x40;
+                break;
+            case 2:
+                mask = 0x20;
+                break;
+            case 3:
+                mask = 0x10;
+                break;
+            case 4:
+                mask = 0x08;
+                break;
+            case 5:
+                mask = 0x04;
+                break;
+            case 6:
+                mask = 0x02;
+                break;
+            case 7:
+                mask = 0x01;
+                break;
             }
 
             if ( byte & mask )
@@ -147,30 +147,30 @@ int32_t TMDataType::getInt32(Sample &sample)
         {
             switch (bitPos)
             {
-                case 0:
-                    mask = 0x80;
-                    break;
-                case 1:
-                    mask = 0x40;
-                    break;
-                case 2:
-                    mask = 0x20;
-                    break;
-                case 3:
-                    mask = 0x10;
-                    break;
-                case 4:
-                    mask = 0x08;
-                    break;
-                case 5:
-                    mask = 0x04;
-                    break;
-                case 6:
-                    mask = 0x02;
-                    break;
-                case 7:
-                    mask = 0x01;
-                    break;
+            case 0:
+                mask = 0x80;
+                break;
+            case 1:
+                mask = 0x40;
+                break;
+            case 2:
+                mask = 0x20;
+                break;
+            case 3:
+                mask = 0x10;
+                break;
+            case 4:
+                mask = 0x08;
+                break;
+            case 5:
+                mask = 0x04;
+                break;
+            case 6:
+                mask = 0x02;
+                break;
+            case 7:
+                mask = 0x01;
+                break;
             }
 
             if ( byte & mask )
@@ -207,30 +207,30 @@ int64_t TMDataType::getInt64(Sample &sample)
         {
             switch (bitPos)
             {
-                case 0:
-                    mask = 0x80;
-                    break;
-                case 1:
-                    mask = 0x40;
-                    break;
-                case 2:
-                    mask = 0x20;
-                    break;
-                case 3:
-                    mask = 0x10;
-                    break;
-                case 4:
-                    mask = 0x08;
-                    break;
-                case 5:
-                    mask = 0x04;
-                    break;
-                case 6:
-                    mask = 0x02;
-                    break;
-                case 7:
-                    mask = 0x01;
-                    break;
+            case 0:
+                mask = 0x80;
+                break;
+            case 1:
+                mask = 0x40;
+                break;
+            case 2:
+                mask = 0x20;
+                break;
+            case 3:
+                mask = 0x10;
+                break;
+            case 4:
+                mask = 0x08;
+                break;
+            case 5:
+                mask = 0x04;
+                break;
+            case 6:
+                mask = 0x02;
+                break;
+            case 7:
+                mask = 0x01;
+                break;
             }
 
             if ( byte & mask )

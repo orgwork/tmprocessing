@@ -37,9 +37,9 @@ class ParameterInfo
 public:
     ParameterInfo();
 
-    string           cdbPid;
-    string           mnemonic;
     int16_t          pidIndex;
+    string cdbPid;
+    string mnemonic;
     ProcessingType   procType;
     DataType         dataType;
     ParameterType    paramType;
@@ -53,7 +53,7 @@ public:
 
     Sample frameIdSamplesMap[32];
 
-    double rawValue;
+    uint64_t rawValue;
     double realValue;
     string stringValue;
 };

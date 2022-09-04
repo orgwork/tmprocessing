@@ -42,8 +42,11 @@ class TMProcessingType
 public:
     TMProcessingType();
 
-    double getPolynomialValue(double *coeffs, uint8_t degree, double tmc);
+    double getPolynomialValue(double *coeffs, int degree, double tmc);
     string getRadixValue(int radixBase, uint64_t tmc);
+
+private:
+    char ascii[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 };
 
 #endif // TMPROCESSINGTYPE_H

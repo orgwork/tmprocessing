@@ -67,6 +67,8 @@ bool ThreadSpawner::Init(string &errMsg)
         errMsg = "Database Initialisation Failure";
         return FAILURE;
     }
+    else
+        hkTMDB->LoadAllParameterDetails();
 
     return SUCCESS;
 }
@@ -134,12 +136,12 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
         bool retSts = FAILURE;
         string errMsg = "";
 
-        TMProcessor tmProcessor(scId, "HKTM");
+        TMProcessor tmProcessor;
 
         tmProcessor.SetTMDatabase(hkTMDB);
         tmProcessor.SetSharedMemoryPointer(threadInfo->ptrHkTmDataBuf);
 
-        retSts = tmProcessor.InitTMProcessor(errMsg);
+        retSts = tmProcessor.InitTMProcessor(scId, "HKTM", errMsg);
         if (retSts == FAILURE)
         {
             cout << errMsg << endl;
@@ -162,11 +164,7 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
             threadInfo->ptrHkTmDataBuf->LatestFrameId = frameId;
 
 
-            //            printMutex.lock();
-            //            for (int i = 0; i < 256; i++)
-            //                printf(" %02X ", tmPkt.CortexData[i]);
 
-            //            cout << endl;
 
             //            printf("STN_Code: %02X \n", tmPkt.StnCode);
             //            printf("DataType: %02X \n", tmPkt.DataType);
@@ -212,7 +210,6 @@ bool ThreadSpawner::StartProcessing(string &errMsg)
 
     while (msgrcv(msgQId, &message, sizeof (message), 0, 0))
     {
-
         memcpy(&tmPkt, message.OneTmFrame, DATALENGTH);
 
         int tmId = (tmPkt.CortexData[10] & 0x20) >> 5;
@@ -225,8 +222,10 @@ bool ThreadSpawner::StartProcessing(string &errMsg)
         else
             tmType = "HKTM2";
 
+
         //        memcpy(stnId, message.OneTmFrame, 4);
         //        stnId[4] = '\0';
+
 
         identifier =  "STN1:" + tmType;
         this->SendNewFrameToWorkerThread(identifier, tmPkt);

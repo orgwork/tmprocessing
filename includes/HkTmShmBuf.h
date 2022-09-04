@@ -5,13 +5,13 @@
 
 typedef struct
 {
-    char CDBPid[MAXPIDLEN] ;
-    char StringValue[MAXCHARVALFORPID] ;
+    char CDBPid[MAXPIDLEN];
+    char StringValue[MAXCHARVALFORPID];
     double RealValue ;
     long long int TmCount ;
     short int UpdateFrameId ;
     short int PidUpdateTime[7] ; // YYYY MM DD HH MM SS MSC
-}OneHkTmProcPidDef ;
+} OneHkTmProcPidDef ;
 
 // One HkTm
 typedef struct
@@ -19,7 +19,7 @@ typedef struct
     unsigned OneRawHkTmFrame[MAXWORDCOUNT];
     short int TimeStatus ; // 1 -> New , 0 -> Old
 
-}OneRawHkTmFrameDef ;
+} OneRawHkTmFrameDef ;
 
 /*
 Following buffer is meant for a unique combination of
@@ -39,7 +39,7 @@ typedef struct
     short int State ; // 1 -> Active , 0 -> Over
     long int TmAcqCount ;
     long int TmRecvCount ;
-}TmOpDataBufDef ;
+} TmOpDataBufDef ;
 
 
 #endif

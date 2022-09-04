@@ -1,6 +1,7 @@
 #include "rtpapi.h"
 #include "../CommonClasses/TMConfiguration.h"
 #include "../includes/HkTmShmBuf.h"
+#include "../includes/TMDBReader.h"
 
 
 struct rtpApiStruct
@@ -10,6 +11,7 @@ struct rtpApiStruct
     string obcId;
     string identifier;
     TMConfiguration config;
+    TMDBReader *tmDBReader;
     bool isValidated;
 
     map<string, TmOpDataBufDef *> shmMap;
@@ -97,40 +99,51 @@ rtpApi initRtpApi(char *scId, bool *ok, char *errMsg)
     else
         *ok = false;
 
-// temporary code
-    char *umacsPath = getenv("UMACS_PATH");
-    if (umacsPath == NULL)
+
+    try
     {
-        errorMsg = "No Environment Variable 'UMACS_PATH' found";
-        *ok = false;
-    }
-    string basePath = umacsPath;
-    string filepath = basePath + "/" + scId + "/TM_PROC/CDBId_PidNum." + scId ;
-    ifstream file;
-    file.open(filepath);
-    if (!file.is_open())
-    {
-        errorMsg = "Could not open the file: " + filepath;
-        *ok = false;
-    }
-    else
-    {
-        string line;
-        int index = 0;
-        while (getline(file, line))
+        obj->tmDBReader = new TMDBReader;
+        char filename[100];
+        strcpy(filename, "/umacssrc/umacsusr18/data/ParamSaveFile.OCN-03.bin");
+        obj->tmDBReader->setBinFileName(filename);
+        string scId;
+        if (obj->tmDBReader->init((char *)scId.c_str(), 1) == false)
         {
-            line = StringUtils::trim(line);
-            vector<string> fields = StringUtils::splitFields(line);
-            obj->pidMap[fields.at(0)] = index;
-            index++;
+            cout << "failed to load database" << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        bool     retSts = false;
+        uint8_t *errMsg = nullptr;
+
+        // TODO: UPDATE FROM SC CONFIG
+        int numOfSubFrames = 32;
+        int tmFormatId = 1;
+
+        int            numOfPids = obj->tmDBReader->glbTMDB_ptr->getTotalNumPids(tmFormatId, &retSts, errMsg);
+        char         **pids      = (char **)obj->tmDBReader->glbTMDB_ptr->getPIDList(tmFormatId, &retSts, errMsg);
+        vector<string> pidVector(pids, pids + numOfPids);
+
+        for (size_t i = 0; i < pidVector.size(); i++)
+        {
+            string cdbPid   = pidVector.at(i);
+
+            uint8_t *pid = (uint8_t *)cdbPid.c_str();
+            int pidIndex = obj->tmDBReader->glbTMDB_ptr->getPIDIndex(pid, &retSts, errMsg);
+
+            obj->pidMap[cdbPid] = pidIndex;
         }
     }
-// temporary code
+    catch (std::exception &e)
+    {
+        cout << e.what() << endl;
+    }
+
+    // temporary code
     if (obj->pidMap.size() > 0)
         *ok = true;
     else
         *ok = false;
-
     strncpy(errMsg, errorMsg.c_str(), 500);
 
     return (void *)obj;

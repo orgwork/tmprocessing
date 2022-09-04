@@ -1,21 +1,18 @@
 #ifndef TMPROCESSOR_HPP
 #define TMPROCESSOR_HPP
 
-#include "../includes/SystemFiles.h"
-#include "../includes/GlobalMacros.h"
-#include <../includes/HkTmShmBuf.h>
-#include "TMDatabase.h"
-#include "MasterFrame.h"
-#include "ProcessParameters.h"
+#include <string>
+
+using namespace std;
 
 class TMProcessor
 {
 public:
-    TMProcessor(string satId, string tmFormat);
+    TMProcessor();
+    ~TMProcessor();
 
-    void SetTMDatabase(TMDatabase *tmdb);
-    bool InitTMProcessor(string &errMsg);
-    bool AddParameter(string pid, string &errMsg);
+    bool InitTMProcessor(string scId, string tmFormat, string &errMsg); //2
+    bool AddParameter(string pid, string &errMsg); //3
     void AddAllParameters();
     bool RemoveParameter(string pid, string &errMsg);
     void RemoveAllParameters();
@@ -23,15 +20,18 @@ public:
     double GetProcessedRealValue(string pid);
     string GetProcessedStringValue(string pid);
     uint64_t GetTMRawCount(string pid);
-    void SetSharedMemoryPointer(TmOpDataBufDef *ptr);
+
+    // Only for RT Processing
+    void SetTMDatabase(void *tmdbPtr);
+    void SetSharedMemoryPointer(void *TmOpDataBufDefPtr);
 
 private:
-    string satId;
+    string scId;
     string tmFormat;
 
-    TMDatabase *tmdb;
-    ProcessParameters *processParams;
-    TmOpDataBufDef *ptrTmOpDataBufDef;
+    void *tmdbPtr;
+    void *processParamsPtr;
+    void *TmOpDataBufDefPtr;
 };
 
 #endif // TMPROCESSOR_HPP

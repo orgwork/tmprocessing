@@ -2,7 +2,8 @@
 
 MasterFrame::MasterFrame()
 {
-
+    this->numOfSubFrames = 32;
+    this->clearMasterFrameData();
 }
 
 
@@ -18,17 +19,8 @@ uint16_t MasterFrame::updateFrame(char *rawFrame)
 
 void MasterFrame::clearMasterFrameData()
 {
-    //    std::vector<uint8_t> frame(256, 0);
-
-    //    std::map<uint16_t, uint8_t *>::iterator it;
-    //    for (int i = 0; i < numOfSubFrames; i++)
-    //    {
-    //        it = rawFrameMap.find(i);
-    //        if (it != rawFrameMap.end())
-    //        {
-    //            rawFrameMap.erase(it);
-    //        }
-
-    //        rawFrameMap[i] = (uint8_t *) frame.data();
-    //    }
+    for (int frameId = 0; frameId < numOfSubFrames; frameId++)
+    {
+        this->rawFrameMap[frameId] = new uint8_t[256];
+    }
 }

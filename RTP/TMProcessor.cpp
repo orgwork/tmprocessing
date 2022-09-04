@@ -1,96 +1,144 @@
 #include "TMProcessor.hpp"
+#include "TMDatabase.h"
+#include "ProcessParameters.h"
+#include <../includes/HkTmShmBuf.h>
 
-TMProcessor::TMProcessor(string satId, string tmFormat)
+TMProcessor::TMProcessor()
 {
-    this->satId = satId;
-    this->tmFormat = tmFormat;
-    this->tmdb = nullptr;
+    this->tmdbPtr = nullptr;
+    this->TmOpDataBufDefPtr = nullptr;
 
-    this->processParams = new ProcessParameters;
+    this->processParamsPtr = new ProcessParameters;
 }
 
 
-void TMProcessor::SetTMDatabase(TMDatabase *tmdb)
+TMProcessor::~TMProcessor()
 {
-    this->tmdb = tmdb;
+//    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
+//    delete processParams;
 }
 
 
-bool TMProcessor::InitTMProcessor(string &errMsg)
+bool TMProcessor::InitTMProcessor(string scId, string tmFormat, string &errMsg)
 {
-    if (this->tmdb == nullptr)
+    try
     {
-        if (tmdb->InitDatabase(satId, tmFormat) == false)
+        TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+        ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
+
+        this->scId = scId;
+        this->tmFormat = tmFormat;
+
+        if (tmdb == nullptr)
         {
-            errMsg = "Database Initialisation Failure";
-            return FAILURE;
+            tmdb = new TMDatabase;
+            this->tmdbPtr = tmdb;
+
+            if (tmdb->InitDatabase(scId, tmFormat) == false)
+            {
+                errMsg = "Database Initialisation Failure";
+                return FAILURE;
+            }
         }
+
+        processParams->tmdb = tmdb;
+        if (TmOpDataBufDefPtr != nullptr)
+            processParams->ptrTmOpDataBufDef = (TmOpDataBufDef *)TmOpDataBufDefPtr;
+
+        return SUCCESS;
     }
-
-    this->processParams->tmdb = tmdb;
-    this->processParams->ptrTmOpDataBufDef = ptrTmOpDataBufDef;
-
-    return SUCCESS;
+    catch (exception &e)
+    {
+        cout << e.what() << endl;
+    }
 }
 
 
 bool TMProcessor::AddParameter(string pid, string &errMsg)
 {
-
-    return SUCCESS;
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    return tmdb->LoadParameter(pid, errMsg);
 }
 
 
 void TMProcessor::AddAllParameters()
 {
-    this->tmdb->LoadAllParameterDetails();
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    tmdb->LoadAllParameterDetails();
 }
 
 
 bool TMProcessor::RemoveParameter(string pid, string &errMsg)
 {
-
-    return SUCCESS;
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    return tmdb->RemoveParameter(pid, errMsg);
 }
 
 
 void TMProcessor::RemoveAllParameters()
 {
-
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    tmdb->RemoveAllParameters();
 }
 
 
 void TMProcessor::ProcessFrame(char *frame)
 {
-    this->processParams->ProcessFrame(frame);
+    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
+
+    processParams->ProcessFrame(frame);
 }
 
 
 double TMProcessor::GetProcessedRealValue(string pid)
 {
-    double procValue = 0.0;
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
 
-    return procValue;
+    double procRealValue = 0.0;
+    if (tmdb->pidIndexMap.count(pid))
+    {
+        int pidIndex = tmdb->pidIndexMap[pid];
+        procRealValue = tmdb->pidIndexParameterMap[pidIndex]->realValue;
+    }
+    return procRealValue;
 }
 
 
 string TMProcessor::GetProcessedStringValue(string pid)
 {
-    string procValue;
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
 
-    return procValue;
+    string procStringValue;
+    if (tmdb->pidIndexMap.count(pid))
+    {
+        int pidIndex = tmdb->pidIndexMap[pid];
+        procStringValue = tmdb->pidIndexParameterMap[pidIndex]->stringValue;
+    }
+    return procStringValue;
 }
 
 
 uint64_t TMProcessor::GetTMRawCount(string pid)
 {
-    uint64_t rawCount = 0;
+    TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
 
+    uint64_t rawCount = 0;
+    if (tmdb->pidIndexMap.count(pid))
+    {
+        int pidIndex = tmdb->pidIndexMap[pid];
+        rawCount = tmdb->pidIndexParameterMap[pidIndex]->rawValue;
+    }
     return rawCount;
 }
 
 
-void TMProcessor::SetSharedMemoryPointer(TmOpDataBufDef *ptr)
+void TMProcessor::SetTMDatabase(void *tmdb)
 {
-    this->ptrTmOpDataBufDef = ptr;
+    this->tmdbPtr = tmdb;
+}
+
+
+void TMProcessor::SetSharedMemoryPointer(void *ptr)
+{
+    this->TmOpDataBufDefPtr = ptr;
 }
