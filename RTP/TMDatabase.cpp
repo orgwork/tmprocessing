@@ -11,24 +11,10 @@ bool TMDatabase::InitDatabase(string scId, string tmFormatId)
 {
     this->tmFormatId = getTMFormatId(tmFormatId);
 
-    // TODO: FETCH FROM ENV VAR
-    char filename[100];
-    //    strcpy(filename, "/umacs/umacsadmin/staticconfig/NIS-01/ParamSaveFile.NIS-01.bin");
-    //    strcpy(filename, "/umacssrc/umacsusr18/data/ParamSaveFile.OCN-03.bin");
-    strcpy(filename, "/home/pramod/data/ParamSaveFile.NIS-01.bin");
-    tmDBReader->setBinFileName(filename);
+    // TODO: For offline database loading, whether to use shared memory or file reading
 
-    if (tmDBReader->init((char *)scId.c_str(), 1) == false)
+    if (tmDBReader->init((char *)scId.c_str(), 0) == false)
         return FAILURE;
-
-    bool     retSts = false;
-    uint8_t *errMsg = nullptr;
-
-    int16_t numOfPids = tmDBReader->glbTMDB_ptr->getTotalNumPids(this->tmFormatId, &retSts, errMsg);
-    if (retSts == true)
-        cout << "\nTotal Number of Pids: " << numOfPids << endl;
-    else
-        cout << errMsg << endl;
 
     return SUCCESS;
 }

@@ -40,9 +40,12 @@ private:
     mutex printMutex;
     int64_t counter;
     TMDatabase *hkTMDB;
+    vector<thread *> processingThreads;
 
     void WorkerThread(threadData *threadInfo);
     void SendNewFrameToWorkerThread(string identifier, TMPacketStructure message);
+    void ThrowMsgGetExceptions();
+    void PrintMsgRcvErrors(int msgQId);
 
 };
 

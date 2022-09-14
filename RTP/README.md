@@ -5,10 +5,11 @@
 But the total number of parameters present in this format may be less than 500.
 Deriving a new index helps in reducing the size of shared memory.
 
-2. if there is no fixed sampling rate?
+2. if there is no fixed sampling rate? - resolved: structure changed accordingly, frame-word-startBit:endBit
 
 3. If processing is killed abruptly, on restart, not able to receive messages
 
+4. Parameter previous values to be taken out of common data(TMDatabase->ParameterInfo, raw, real, string values of parameters) shared between threads
 
 # DB Issues
 1. getNumPidsInCurFrm int initializing with 0

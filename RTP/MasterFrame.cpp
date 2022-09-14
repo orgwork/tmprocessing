@@ -22,5 +22,7 @@ void MasterFrame::clearMasterFrameData()
     for (int frameId = 0; frameId < numOfSubFrames; frameId++)
     {
         this->rawFrameMap[frameId] = new uint8_t[256];
+        for (int i = 0; i < 256; i++)
+            this->rawFrameMap[frameId][i] = 0;
     }
 }

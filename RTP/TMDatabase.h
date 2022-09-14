@@ -1,10 +1,7 @@
 #ifndef TMDATABASE_H
 #define TMDATABASE_H
 
-#include "../includes/Constants.h"
 #include "../includes/GlobalMacros.h"
-#include "../includes/Headers.h"
-#include "../includes/SharedMemoryTemplate.h"
 #include "../includes/SystemFiles.h"
 #include "../includes/TMDBReader.h"
 #include "../includes/TMShmStruct.h"

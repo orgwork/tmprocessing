@@ -20,28 +20,28 @@ int main(int argc, char *argv[])
     //    Initiation
     if (!ts.Init(errMsg))
     {
-        cout << errMsg << endl;
+        cerr << errMsg << endl;
         return EXIT_FAILURE;
     }
 
     //    Attach to all SHM Segments for the group
     if (!ts.AttachToShmSegments(errMsg))
     {
-        cout << errMsg << endl;
+        cerr << errMsg << endl;
         return EXIT_FAILURE;
     }
 
     //    Spawn Threads to process all streams of the group
     if (!ts.SpawnThreads(errMsg))
     {
-        cout << errMsg << endl;
+        cerr << errMsg << endl;
         return EXIT_FAILURE;
     }
 
     //    Start Receiving data and process
     if (!ts.StartProcessing(errMsg))
     {
-        cout << errMsg << endl;
+        cerr << errMsg << endl;
         return EXIT_FAILURE;
     }
 

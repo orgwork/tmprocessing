@@ -2,5 +2,5 @@
 
 ParameterInfo::ParameterInfo()
 {
-
+    this->polynomialDegree = 0;
 }

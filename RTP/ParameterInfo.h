@@ -48,14 +48,11 @@ public:
     bool             isConditional;
     ConditionType    condType;
     map<int, string> digitalStatusMap;
-    uint8_t          polynomialDegree;
+    int          polynomialDegree;
     double_t         *coefficientList; // 0 - x^0 = 1 ie, Constant // 1 - x // 2 - x^2  // 3 - x^3
 
     Sample frameIdSamplesMap[32];
 
-    uint64_t rawValue;
-    double realValue;
-    string stringValue;
 };
 
 #endif // PARAMETERINFO_H

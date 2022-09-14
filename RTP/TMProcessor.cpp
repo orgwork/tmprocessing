@@ -14,8 +14,8 @@ TMProcessor::TMProcessor()
 
 TMProcessor::~TMProcessor()
 {
-//    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
-//    delete processParams;
+    //    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
+    //    delete processParams;
 }
 
 
@@ -93,12 +93,13 @@ void TMProcessor::ProcessFrame(char *frame)
 double TMProcessor::GetProcessedRealValue(string pid)
 {
     TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
 
     double procRealValue = 0.0;
     if (tmdb->pidIndexMap.count(pid))
     {
         int pidIndex = tmdb->pidIndexMap[pid];
-        procRealValue = tmdb->pidIndexParameterMap[pidIndex]->realValue;
+        procRealValue = processParams->realValue[pidIndex];
     }
     return procRealValue;
 }
@@ -107,12 +108,13 @@ double TMProcessor::GetProcessedRealValue(string pid)
 string TMProcessor::GetProcessedStringValue(string pid)
 {
     TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
 
     string procStringValue;
     if (tmdb->pidIndexMap.count(pid))
     {
         int pidIndex = tmdb->pidIndexMap[pid];
-        procStringValue = tmdb->pidIndexParameterMap[pidIndex]->stringValue;
+        procStringValue = processParams->stringValue[pidIndex];
     }
     return procStringValue;
 }
@@ -121,12 +123,13 @@ string TMProcessor::GetProcessedStringValue(string pid)
 uint64_t TMProcessor::GetTMRawCount(string pid)
 {
     TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
 
     uint64_t rawCount = 0;
     if (tmdb->pidIndexMap.count(pid))
     {
         int pidIndex = tmdb->pidIndexMap[pid];
-        rawCount = tmdb->pidIndexParameterMap[pidIndex]->rawValue;
+        rawCount = processParams->rawValue[pidIndex];
     }
     return rawCount;
 }

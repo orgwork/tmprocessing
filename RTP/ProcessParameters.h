@@ -22,6 +22,10 @@ public:
     TMProcessingType tmProcType;
     TmOpDataBufDef *ptrTmOpDataBufDef;
 
+    uint64_t rawValue[MAXPID];
+    double realValue[MAXPID];
+    string stringValue[MAXPID];
+
 private:
     int curFrameId;
 
