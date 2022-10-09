@@ -103,11 +103,8 @@ rtpApi initRtpApi(char *scId, bool *ok, char *errMsg)
     try
     {
         obj->tmDBReader = new TMDBReader;
-        char filename[100];
-        strcpy(filename, "/umacssrc/umacsusr18/data/ParamSaveFile.OCN-03.bin");
-        obj->tmDBReader->setBinFileName(filename);
-        string scId;
-        if (obj->tmDBReader->init((char *)scId.c_str(), 1) == false)
+        string scId = "NIS-01";
+        if (obj->tmDBReader->init((char *)scId.c_str(), 0) == false)
         {
             cout << "failed to load database" << endl;
             exit(EXIT_FAILURE);
@@ -117,7 +114,6 @@ rtpApi initRtpApi(char *scId, bool *ok, char *errMsg)
         uint8_t *errMsg = nullptr;
 
         // TODO: UPDATE FROM SC CONFIG
-        int numOfSubFrames = 32;
         int tmFormatId = 1;
 
         int            numOfPids = obj->tmDBReader->glbTMDB_ptr->getTotalNumPids(tmFormatId, &retSts, errMsg);
@@ -246,6 +242,9 @@ bool getPidVal(rtpApi obj, const char *pid, double *realValue, char *stringValue
     if (!apiStruct->isValidated)
         return FAILURE;
 
+    if (!apiStruct->pidMap.count(pid))
+        return FAILURE;
+
     int pidIndex = apiStruct->pidMap[pid];
 
     TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
@@ -265,6 +264,9 @@ bool getRealPidValue(rtpApi obj, const char *pid, double *realValue)
     if (!apiStruct->isValidated)
         return FAILURE;
 
+    if (!apiStruct->pidMap.count(pid))
+        return FAILURE;
+
     TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
 
     *realValue = ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].RealValue;
@@ -280,8 +282,11 @@ bool getStringPidValue(rtpApi obj, const char *pid, char *stringValue)
     if (!apiStruct->isValidated)
         return FAILURE;
 
+    if (!apiStruct->pidMap.count(pid))
+        return FAILURE;
+
     TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];
-    strncpy(stringValue, ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].StringValue, 15);
+    strncpy(stringValue, ptr->HkTmPrcOpBuf[apiStruct->pidMap[pid]].StringValue, 14);
 
     return SUCCESS;
 }
@@ -292,6 +297,9 @@ bool getRawPidValue(rtpApi obj, const char *pid, long long int *tmCount)
     rtpApiStruct *apiStruct = (rtpApiStruct *)obj;
 
     if (!apiStruct->isValidated)
+        return FAILURE;
+
+    if (!apiStruct->pidMap.count(pid))
         return FAILURE;
 
     TmOpDataBufDef *ptr = apiStruct->shmMap[apiStruct->identifier];

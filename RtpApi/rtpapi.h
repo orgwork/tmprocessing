@@ -29,7 +29,9 @@ bool setObcId(rtpApi obj, const char *obcId, char *errMsg);
 bool validate(rtpApi obj, char *errMsg);
 
 // Get PID Values -- Processed real value, Processed string value, TM Raw Count
-bool getPidVal(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long *tmCount);
+bool getPidVal(rtpApi obj, const char *pid, double *realValue, char *stringValue, long long int *tmCount);
+
+bool getPidValues( rtpApi obj, short noOfPids, char pidMnm[], double enggVal[], char strVal[][], long long int rawVal[], int   *frmTimeInMS, int  *dataBrkFlg, char errMsg[] );
 
 // Get PID Values -- Processed real value
 bool getRealPidValue(rtpApi obj, const char *pid, double *realValue);

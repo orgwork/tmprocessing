@@ -42,14 +42,13 @@ bool TMProcessor::InitTMProcessor(string scId, string tmFormat, string &errMsg)
         }
 
         processParams->tmdb = tmdb;
-        if (TmOpDataBufDefPtr != nullptr)
-            processParams->ptrTmOpDataBufDef = (TmOpDataBufDef *)TmOpDataBufDefPtr;
 
         return SUCCESS;
     }
     catch (exception &e)
     {
         cout << e.what() << endl;
+        return FAILURE;
     }
 }
 
@@ -64,7 +63,12 @@ bool TMProcessor::AddParameter(string pid, string &errMsg)
 void TMProcessor::AddAllParameters()
 {
     TMDatabase *tmdb = (TMDatabase *)tmdbPtr;
+    ProcessParameters *processParams = (ProcessParameters *)processParamsPtr;
+
     tmdb->LoadAllParameterDetails();
+
+    if (TmOpDataBufDefPtr != nullptr)
+        processParams->SetPtrTmOpDataBufDef((TmOpDataBufDef *)TmOpDataBufDefPtr);
 }
 
 

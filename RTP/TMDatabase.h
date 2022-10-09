@@ -4,7 +4,6 @@
 #include "../includes/GlobalMacros.h"
 #include "../includes/SystemFiles.h"
 #include "../includes/TMDBReader.h"
-#include "../includes/TMShmStruct.h"
 #include "ParameterInfo.h"
 
 enum TMFormatId

@@ -53,6 +53,9 @@ public:
 
     Sample frameIdSamplesMap[32];
 
+    map<int, string> lutValues;
+    map<int, int> lutTypes;
+
 };
 
 #endif // PARAMETERINFO_H

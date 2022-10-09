@@ -36,8 +36,8 @@ void ProcessParameters::ProcessFrame(char *rawFrame)
         {
             this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].TmCount = rawValue[pidIndex];
             this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].RealValue = realValue[pidIndex];
-            this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].StringValue[MAXCHARVALFORPID] = '\0';
             strncpy(this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].StringValue, stringValue[pidIndex].c_str(), MAXCHARVALFORPID);
+            memcpy(this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].PidUpdateTime, this->ptrTmOpDataBufDef->FrameUpdateTime, 10);
         }
     }
 
@@ -49,37 +49,37 @@ void ProcessParameters::UpdateRawValue(ParameterInfo *parameter)
     int pidIndex = parameter->pidIndex;
     switch (parameter->dataType)
     {
-        case DataType::Normal:
-            rawValue[pidIndex] = tmDataType.getInt64(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::Normal:
+        rawValue[pidIndex] = tmDataType.getInt64(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::OnesComplement:
-            rawValue[pidIndex] =  tmDataType.getOnesComplement(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::OnesComplement:
+        rawValue[pidIndex] =  tmDataType.getOnesComplement(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::TwosCompliment:
-            rawValue[pidIndex] =  tmDataType.getTwosComplement(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::TwosCompliment:
+        rawValue[pidIndex] =  tmDataType.getTwosComplement(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::GrayCode:
-            rawValue[pidIndex] =  tmDataType.getGray2Bin(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::GrayCode:
+        rawValue[pidIndex] =  tmDataType.getGray2Bin(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::FloatIEEE32Bit:
-            rawValue[pidIndex] =  tmDataType.getIEEE32Float(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::FloatIEEE32Bit:
+        rawValue[pidIndex] =  tmDataType.getIEEE32Float(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::FloatIEEE64Bit:
-            rawValue[pidIndex] =  tmDataType.getIEEE64Float(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::FloatIEEE64Bit:
+        rawValue[pidIndex] =  tmDataType.getIEEE64Float(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::Float1750A32Bit:
-            rawValue[pidIndex] =  tmDataType.get1750A32Float(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::Float1750A32Bit:
+        rawValue[pidIndex] =  tmDataType.get1750A32Float(parameter->frameIdSamplesMap[curFrameId]);
+        break;
 
-        case DataType::Float1750A48Bit:
-            rawValue[pidIndex] =  tmDataType.get1750A48Float(parameter->frameIdSamplesMap[curFrameId]);
-            break;
+    case DataType::Float1750A48Bit:
+        rawValue[pidIndex] =  tmDataType.get1750A48Float(parameter->frameIdSamplesMap[curFrameId]);
+        break;
     }
 }
 
@@ -89,32 +89,60 @@ void ProcessParameters::UpdateProcessedValue(ParameterInfo *parameter)
     int pidIndex = parameter->pidIndex;
     switch (parameter->paramType)
     {
-        case ParameterType::DIGITAL:
-            {
-                int key = rawValue[pidIndex];
-                realValue[pidIndex] = key;
-                stringValue[pidIndex] = parameter->digitalStatusMap[key];
-                break;
-            }
+    case ParameterType::DIGITAL:
+    {
+        int key = rawValue[pidIndex];
+        realValue[pidIndex] = key;
 
-        case ParameterType::POLYNOMIAL:
-            {
-                realValue[pidIndex] = tmProcType.getPolynomialValue(parameter->coefficientList, parameter->polynomialDegree, rawValue[pidIndex]);
-                stringValue[pidIndex] = to_string(realValue[pidIndex]);
-                break;
-            }
+        if (parameter->digitalStatusMap.count(key))
+            stringValue[pidIndex] = parameter->digitalStatusMap[key];
+        else
+            stringValue[pidIndex] = "INVALID";
 
-        case ParameterType::RADIX:
-            {
-                realValue[pidIndex] = rawValue[pidIndex];
-                stringValue[pidIndex] = tmProcType.getRadixValue(parameter->displayFormat, rawValue[pidIndex]);
-                break;
-            }
-        case ParameterType::LUT:
+        break;
+    }
 
-            break;
+    case ParameterType::POLYNOMIAL:
+    {
+        realValue[pidIndex] = tmProcType.getPolynomialValue(parameter->coefficientList, parameter->polynomialDegree, rawValue[pidIndex]);
+        stringValue[pidIndex] = to_string(realValue[pidIndex]);
 
-        default:
-            break;
+        break;
+    }
+
+    case ParameterType::RADIX:
+    {
+        realValue[pidIndex] = rawValue[pidIndex];
+        stringValue[pidIndex] = tmProcType.getRadixValue(parameter->displayFormat, rawValue[pidIndex]);
+
+        break;
+    }
+
+    case ParameterType::LUT:
+    {
+        // TODO: what value to be put if no value is found in map
+        stringValue[pidIndex] = parameter->lutValues[rawValue[pidIndex]];
+        realValue[pidIndex] = stod(stringValue[pidIndex]);
+
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
+
+void ProcessParameters::SetPtrTmOpDataBufDef(TmOpDataBufDef *ptrTmOpDataBufDef)
+{
+    this->ptrTmOpDataBufDef = ptrTmOpDataBufDef;
+
+    for (int pidIndex = 0; pidIndex < MAXPID; pidIndex++)
+    {
+        this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].StringValue[MAXCHARVALFORPID] = '\0';
+
+        ParameterInfo *parameter = tmdb->pidIndexParameterMap[pidIndex];
+
+        memcpy(this->ptrTmOpDataBufDef->HkTmPrcOpBuf[pidIndex].CDBPid, parameter->cdbPid.c_str(), MAXPIDLEN);
     }
 }

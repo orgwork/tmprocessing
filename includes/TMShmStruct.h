@@ -10,6 +10,8 @@
 
 #include "math.h"
 #include "stdint.h"
+#include <map>
+#include <string>
 
 #pragma pack(push,2)
 
@@ -56,6 +58,7 @@
 
 #define MAXOPTRLEN 3
 
+using namespace std;
 
     struct digitalInfo
     {
@@ -91,6 +94,8 @@
         uint8_t expression[MAXEXPLEN]; //derived        
     };
 
+    
+    
     struct conditionInfo
     {
        uint8_t 	cdbPid[MAXPIDLEN]; //direct
@@ -212,7 +217,7 @@ public:
     int16_t condnTrthTblIndexPtr; 
     
     uint8_t  unit; //direct
-    uint8_t  scope; //direct 
+    uint8_t  scope; //direct
     uint8_t  authenticationStage; //direct
     uint8_t limitType; //direct /*0-none 1-simple, 2-conditional*/
     uint8_t testabilityInCkout; //direct    
@@ -227,7 +232,7 @@ public:
     
     uint64_t   modifiedTime; // CDB Modification time epoch in sec
     
-    TMParameter();
+    //TMParameter();
    
     
 };
@@ -235,7 +240,8 @@ public:
 class globalTMDBInfo{
     
 public:
-
+    
+      
     TMParameter tmPars[MAXPID];
     uint16_t   noOfTmPids;
     uint8_t    pidDefinedInCurrentFrame[MAXFRAMECOUNT][MAXFRMPID][MAXPIDLEN] ; 
@@ -266,7 +272,7 @@ public:
     uint8_t scopeAuthInfo[MAXSCPEAUTHSETS][MAXSCPEAUTHLEN];   
    
     
-    globalTMDBInfo();
+    //globalTMDBInfo();
     
 //API 
     uint16_t getTotalNumPids(bool * retSts, uint8_t * errMsg); // returns the total number of PIDs
@@ -388,7 +394,18 @@ public:
     uint8_t** getPIDFromDwellAdrr(uint8_t* dwlAddr, bool * retSts, uint8_t * errMsg, uint16_t * noOfPids); //returns the list of PIDs corresponding to the given dwell address
     uint8_t** getPIDChannelInfo(uint8_t* PID, bool * retSts, uint8_t * errMsg); //returns the channel information (wordNo,FrameNo and bit numbers) for the given PID
     
+    bool isValidPid(uint8_t * PID, bool * retSts, uint8_t * errMsg);
+    uint8_t* getPIDFromIndex(uint16_t index, bool * retSts, uint8_t * errMsg); //returns the PID corresponding to the given Index
+
+    char getLutDetails(string PID, int setNo, map<int,string> &lutValues, map<int,int> &lutTypes, string &errMsg);
     
+}; 
+
+class satInfo{
+
+public:
+   static  string satID;
+   static  string tmFilesPath;
 };
 
 #pragma pack(pop)

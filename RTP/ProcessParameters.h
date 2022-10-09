@@ -15,6 +15,7 @@ public:
     void ProcessFrame(char *rawFrame);
     void UpdateRawValue(ParameterInfo *parameter);
     void UpdateProcessedValue(ParameterInfo *parameter);
+    void SetPtrTmOpDataBufDef(TmOpDataBufDef *ptrTmOpDataBufDef);
 
     TMDatabase *tmdb;
     MasterFrame *masterFrame;

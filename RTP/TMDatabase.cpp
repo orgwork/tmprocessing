@@ -13,6 +13,8 @@ bool TMDatabase::InitDatabase(string scId, string tmFormatId)
 
     // TODO: For offline database loading, whether to use shared memory or file reading
 
+    scId = "NIS-01";
+
     if (tmDBReader->init((char *)scId.c_str(), 0) == false)
         return FAILURE;
 
@@ -60,7 +62,22 @@ bool TMDatabase::LoadParameter(string paramId, string &errorMsg)
         parameter->dataType = (DataType)tmDBReader->glbTMDB_ptr->getPIDDataType(pid, &retSts, errMsg);
         parameter->procType = (ProcessingType)tmDBReader->glbTMDB_ptr->getPIDProcType(pid, &retSts, errMsg);
 
+        parameter->isConditional = tmDBReader->glbTMDB_ptr->IsConditionalPar(pid, &retSts, errMsg);
+
+//        cout << tmDBReader->glbTMDB_ptr->getPIDDisplayFormat(pid, &retSts, errMsg) << endl;
+
         uint8_t noOfConds = tmDBReader->glbTMDB_ptr->getPIDNoOfCondn(pid, &retSts, errMsg);
+        for (uint8_t condnNo = 0; condnNo < noOfConds; condnNo++)
+        {
+            uint8_t condType = tmDBReader->glbTMDB_ptr->getPIDCondnType(pid, &retSts, errMsg);
+            uint8_t *condnSrcPID = tmDBReader->glbTMDB_ptr->getPIDCondnSrcPID(pid, condnNo, &retSts, errMsg);
+            uint8_t *condnOptr = tmDBReader->glbTMDB_ptr->getPIDCondnOptr(pid,  condnNo, &retSts, errMsg);
+            uint16_t condnSrcPIDValueType = tmDBReader->glbTMDB_ptr->getCondnSrcPIDValueType(pid,  condnNo, &retSts,  errMsg);
+            double_t condnAnalogVal = tmDBReader->glbTMDB_ptr->getPIDCondnAnalogVal(pid,  condnNo, &retSts, errMsg);
+            uint8_t *condnDigValue = tmDBReader->glbTMDB_ptr->getPIDCondnDigValue(pid,  condnNo, &retSts, errMsg);
+
+//            cout << (unsigned)condType << " " << condnSrcPID << " " << condnOptr << " " << condnSrcPIDValueType << " " << condnAnalogVal << " " << condnDigValue << endl;
+        }
 
         uint8_t noOfSets = tmDBReader->glbTMDB_ptr->getPIDNoOfSets(pid, &retSts, errMsg);
 
@@ -132,104 +149,115 @@ bool TMDatabase::LoadParameter(string paramId, string &errorMsg)
 
             switch (parameter->procType)
             {
-                // ********** DIGITAL Parameters **********
-                case ProcessingType::PROC_DIGITAL:
-                    {
-                        parameter->paramType = ParameterType::DIGITAL;
+            // ********** DIGITAL Parameters **********
+            case ProcessingType::PROC_DIGITAL:
+            {
+                parameter->paramType = ParameterType::DIGITAL;
 
-                        int noOfDigitalMsgs = tmDBReader->glbTMDB_ptr->getPIDNoOfDigMsg(pid, setNo, &retSts, errMsg);
+                int noOfDigitalMsgs = tmDBReader->glbTMDB_ptr->getPIDNoOfDigMsg(pid, setNo, &retSts, errMsg);
 
-                        // TODO: REMOVE AFTER DB CORRECTION
-                        if (noOfDigitalMsgs > 50)
-                            break;
-
-                        uint8_t     *keys = tmDBReader->glbTMDB_ptr->getPIDListOfDigPtnKeys(pid, setNo, &retSts, errMsg);
-                        vector<uint8_t> keyList(keys, keys + noOfDigitalMsgs);
-
-                        char         **msgs = (char **)tmDBReader->glbTMDB_ptr->getPIDListOfDigMsg(pid, setNo, &retSts, errMsg);
-                        vector<string> msgList(msgs, msgs + noOfDigitalMsgs);
-
-                        for (int msgNo = 0; msgNo < noOfDigitalMsgs; msgNo++)
-                        {
-                            int    key   = keyList.at(msgNo);
-                            string value = msgList.at(msgNo);
-
-                            parameter->digitalStatusMap[key] = value;
-                        }
-
-                        break;
-                    }
-
-                // ********** RADIX Parameters - DEC **********
-                case ProcessingType::PROC_1BYTE_DEC:
-                case ProcessingType::PROC_2BYTE_DEC:
-                case ProcessingType::PROC_AND_1BYTE_DEC:
-                case ProcessingType::PROC_AND_2BYTE_DEC:
-                    {
-                        parameter->paramType = ParameterType::RADIX;
-
-                        parameter->displayFormat = DisplayFormat::DECIMAL;
-
-                        break;
-                    }
-
-                // ********** RADIX Parameters - HEX **********
-                case ProcessingType::PROC_1BYTE_HEX:
-                case ProcessingType::PROC_2BYTE_HEX:
-                case ProcessingType::PROC_NBYTE_HEX:
-                case ProcessingType::PROC_AND_1BYTE_HEX:
-                case ProcessingType::PROC_AND_2BYTE_HEX:
-                    {
-                        parameter->paramType = ParameterType::RADIX;
-
-                        parameter->displayFormat = DisplayFormat::HEXADECIMAL;
-
-                        break;
-                    }
-
-                // ********** POLYNOMIALicient Parameters **********
-                case ProcessingType::PROC_1BYTE_POLYNOMIAL:
-                case ProcessingType::PROC_2BYTE_POLYNOMIAL:
-                case ProcessingType::PROC_AND_2BYTE_POLYNOMIAL:
-                case ProcessingType::PROC_1750_16BIT_POLYNOMIAL:
-                case ProcessingType::PROC_1750_24BIT_POLYNOMIAL:
-                case ProcessingType::PROC_1750_40BIT_POLYNOMIAL:
-                case ProcessingType::PROC_IEEE_32BIT_POLYNOMIAL:
-                case ProcessingType::PROC_IEEE_48BIT_POLYNOMIAL:
-                case ProcessingType::PROC_1BYTE_2COMPL_POLYNOMIAL:
-                case ProcessingType::PROC_2BYTE_2COMPL_POLYNOMIAL:
-                case ProcessingType::PROC_AND_2BYTE_2COMPL_POLYNOMIAL:
-                    {
-                        parameter->paramType = ParameterType::POLYNOMIAL;
-
-                        int degree = tmDBReader->glbTMDB_ptr->getPIDEqnOrder(pid, setNo, &retSts, errMsg);
-
-                        // TODO: REMOVE AFTER DB CORRECTION
-                        if (degree > 10)
-                            break;
-
-                        parameter->polynomialDegree = degree;
-                        parameter->coefficientList  = tmDBReader->glbTMDB_ptr->getPIDEqnCoeffOffset(pid, setNo, &retSts, errMsg);
-
-                        break;
-                    }
-
-                case ProcessingType::PROC_1750_48BIT_TIME:
-                case ProcessingType::PROC_32BIT_TIME:
-                case ProcessingType::PROC_AEXP:
-                case ProcessingType::PROC_CONSTANT_VARIABLE:
-                case ProcessingType::PROC_CPID:
-                case ProcessingType::PROC_LUT:
-                case ProcessingType::PROC_SPLA:
-
-                    parameter->paramType = ParameterType::NONE;
+                // TODO: REMOVE AFTER DB CORRECTION
+                if (noOfDigitalMsgs > 50)
                     break;
 
+                uint8_t     *keys = tmDBReader->glbTMDB_ptr->getPIDListOfDigPtnKeys(pid, setNo, &retSts, errMsg);
+                vector<uint8_t> keyList(keys, keys + noOfDigitalMsgs);
 
-                default:
-                    parameter->paramType = ParameterType::NONE;
+                char **msgs = (char **)tmDBReader->glbTMDB_ptr->getPIDListOfDigMsg(pid, setNo, &retSts, errMsg);
+                vector<string> msgList(msgs, msgs + noOfDigitalMsgs);
 
+                for (int msgNo = 0; msgNo < noOfDigitalMsgs; msgNo++)
+                {
+                    int    key   = keyList.at(msgNo);
+                    string value = msgList.at(msgNo);
+
+                    parameter->digitalStatusMap[key] = value;
+                }
+
+                break;
+            }
+
+            // ********** RADIX Parameters - DEC **********
+            case ProcessingType::PROC_1BYTE_DEC:
+            case ProcessingType::PROC_2BYTE_DEC:
+            case ProcessingType::PROC_AND_1BYTE_DEC:
+            case ProcessingType::PROC_AND_2BYTE_DEC:
+            {
+                parameter->paramType = ParameterType::RADIX;
+
+                parameter->displayFormat = DisplayFormat::DECIMAL;
+
+                break;
+            }
+
+            // ********** RADIX Parameters - HEX **********
+            case ProcessingType::PROC_1BYTE_HEX:
+            case ProcessingType::PROC_2BYTE_HEX:
+            case ProcessingType::PROC_NBYTE_HEX:
+            case ProcessingType::PROC_AND_1BYTE_HEX:
+            case ProcessingType::PROC_AND_2BYTE_HEX:
+            {
+                parameter->paramType = ParameterType::RADIX;
+
+                parameter->displayFormat = DisplayFormat::HEXADECIMAL;
+
+                break;
+            }
+
+            // ********** POLYNOMIALicient Parameters **********
+            case ProcessingType::PROC_1BYTE_POLYNOMIAL:
+            case ProcessingType::PROC_2BYTE_POLYNOMIAL:
+            case ProcessingType::PROC_AND_2BYTE_POLYNOMIAL:
+            case ProcessingType::PROC_1750_16BIT_POLYNOMIAL:
+            case ProcessingType::PROC_1750_24BIT_POLYNOMIAL:
+            case ProcessingType::PROC_1750_40BIT_POLYNOMIAL:
+            case ProcessingType::PROC_IEEE_32BIT_POLYNOMIAL:
+            case ProcessingType::PROC_IEEE_48BIT_POLYNOMIAL:
+            case ProcessingType::PROC_1BYTE_2COMPL_POLYNOMIAL:
+            case ProcessingType::PROC_2BYTE_2COMPL_POLYNOMIAL:
+            case ProcessingType::PROC_AND_2BYTE_2COMPL_POLYNOMIAL:
+            {
+                parameter->paramType = ParameterType::POLYNOMIAL;
+
+                int degree = tmDBReader->glbTMDB_ptr->getPIDEqnOrder(pid, setNo, &retSts, errMsg);
+
+                // TODO: REMOVE AFTER DB CORRECTION
+                if (degree > 10)
                     break;
+
+                parameter->polynomialDegree = degree;
+                parameter->coefficientList  = tmDBReader->glbTMDB_ptr->getPIDEqnCoeffOffset(pid, setNo, &retSts, errMsg);
+
+                break;
+            }
+
+            case ProcessingType::PROC_LUT:
+            {
+                parameter->paramType = ParameterType::LUT;
+
+                string PID = (char *)pid;
+                string error;
+
+                char sts = tmDBReader->glbTMDB_ptr->getLutDetails(PID, setNo, parameter->lutValues, parameter->lutTypes, error);
+
+                break;
+            }
+
+            case ProcessingType::PROC_1750_48BIT_TIME:
+            case ProcessingType::PROC_32BIT_TIME:
+            case ProcessingType::PROC_AEXP:
+            case ProcessingType::PROC_CONSTANT_VARIABLE:
+            case ProcessingType::PROC_CPID:
+            case ProcessingType::PROC_SPLA:
+
+                parameter->paramType = ParameterType::NONE;
+                break;
+
+
+            default:
+                parameter->paramType = ParameterType::NONE;
+
+                break;
             }
         }
 

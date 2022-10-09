@@ -41,7 +41,7 @@ HEADERS += \
 
 
 LIBS += /home/pramod/projects/tm-api-dataTypeChg/dist/Debug/GNU-Linux/libtm-api-datatypechg.a
-#LIBS += /umacssrc/umacsusr18/libs/libtm-api.a
+#LIBS +=  /umacssrc/umacsdevadmin/lib/libtm-api.a
 LIBS += -lpthread
 
 DISTFILES += \

@@ -21,6 +21,12 @@ struct threadData
     exception_ptr teptr;
 };
 
+enum ProcessedBufferStatus
+{
+    ACTIVE = 1,
+    OVER = 0
+};
+
 class ThreadSpawner
 {
 public:
@@ -37,6 +43,7 @@ private:
     string MsgQIdentifier;
     bool isAppRunning;
     map<string, threadData *> threadMap;
+    map<string, int> prevFrameIdMap; // TODO: To be Removed
     mutex printMutex;
     int64_t counter;
     TMDatabase *hkTMDB;
@@ -46,6 +53,7 @@ private:
     void SendNewFrameToWorkerThread(string identifier, TMPacketStructure message);
     void ThrowMsgGetExceptions();
     void PrintMsgRcvErrors(int msgQId);
+    void PrintPacketDetails(TMPacketStructure tmPkt);
 
 };
 

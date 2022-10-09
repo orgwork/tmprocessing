@@ -45,6 +45,7 @@ bool ThreadSpawner::Init(string &errMsg)
                     td->threadId = identifier;
 
                     this->threadMap[identifier] = td;
+                    this->prevFrameIdMap[identifier] = -1;
                 }
             }
             else
@@ -58,6 +59,7 @@ bool ThreadSpawner::Init(string &errMsg)
                 td->threadId = identifier;
 
                 this->threadMap[identifier] = td;
+                this->prevFrameIdMap[identifier] = -1;
             }
         }
     }
@@ -158,12 +160,17 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
         tmProcessor.SetTMDatabase(hkTMDB);
         tmProcessor.SetSharedMemoryPointer(threadInfo->ptrHkTmDataBuf);
 
+        memcpy(threadInfo->ptrHkTmDataBuf->ScId, scId.c_str(), 6);
+
         retSts = tmProcessor.InitTMProcessor(scId, "HKTM", errMsg);
         if (retSts == FAILURE)
         {
             cout << errMsg << endl;
             return;
         }
+
+        string tmOpFileName = "/tmp/" + threadInfo->threadId + "_breaks.log";
+        ofstream tmop_file(tmOpFileName);
 
         while (isAppRunning)
         {
@@ -174,35 +181,54 @@ void ThreadSpawner::WorkerThread(threadData *threadInfo)
 
             TMPacketStructure tmPkt = threadInfo->packets.front();
 
+            threadInfo->ptrHkTmDataBuf->State = ACTIVE;
+
             short frameId = tmPkt.CortexData[10] & 0x1f;
 
-            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, &tmPkt.CortexData, 256);
+            memcpy(threadInfo->ptrHkTmDataBuf->RawHkTmMasterFrame[frameId].OneRawHkTmFrame, tmPkt.CortexData, 256);
+
+            memcpy(threadInfo->ptrHkTmDataBuf->FrameUpdateTime, tmPkt.ReceivedTime, 10);
 
             tmProcessor.ProcessFrame((char *)tmPkt.CortexData);
 
             threadInfo->ptrHkTmDataBuf->LatestFrameId = frameId;
 
-            //            printf("STN_Code: %02X \n", tmPkt.StnCode);
-            //            printf("DataType: %02X \n", tmPkt.DataType);
-            //            printf("TMSource: %02X \n", tmPkt.TMSource);
+            threadInfo->ptrHkTmDataBuf->State = OVER;
 
-            //            for (int i = 0; i < 10; i++)
-            //                printf("%02X ", tmPkt.ReceivedTime[i]);
-
-            //            cout << endl;
-
-            //            cout << "Thread Id: " << threadInfo->threadId << "  " << frameId << endl;
-            //            printMutex.unlock();
+            this->PrintPacketDetails(tmPkt);
 
             threadInfo->packets.pop();
 
-            // Make a slot free for new packet
+            // Make the slot free for new packet
             sem_post(&threadInfo->dataEmpty);
-
 
             auto endTime = chrono::high_resolution_clock::now();
 
+            printMutex.lock();
             cout << "Processed Frame: " << frameId << " in " << chrono::duration_cast<chrono::microseconds>(endTime - startTime).count() << " us" << endl;
+            printMutex.unlock();
+
+            // Data Break Check
+            int prevFrameId = this->prevFrameIdMap[threadInfo->threadId];
+            int expectedFrameId;
+
+            if (prevFrameId == 31)
+                expectedFrameId = 0;
+            else if (prevFrameId == -1)
+                expectedFrameId = frameId;
+            else
+                expectedFrameId = prevFrameId + 1;
+
+            if (expectedFrameId != frameId)
+            {
+                printMutex.lock();
+                cout << "Expected Frame Id: " << expectedFrameId << " Received Frame Id: " << frameId << endl;
+                printMutex.unlock();
+
+                tmop_file << "Expected Frame Id: " << expectedFrameId << " Received Frame Id: " << frameId << endl;
+            }
+
+            this->prevFrameIdMap[threadInfo->threadId] = frameId;
         }
     }
     catch (std::exception &e)
@@ -251,7 +277,7 @@ bool ThreadSpawner::StartProcessing(string &errMsg)
             else
                 tmType = "HKTM2";
 
-            identifier =  "STN1:" + tmType;
+            identifier =  "CHAIN1:" + tmType;
             this->SendNewFrameToWorkerThread(identifier, tmPkt);
 
             // TODO: Only send packet here if it is confirmed as new. Check based on Ground Received Time
@@ -309,29 +335,29 @@ void ThreadSpawner::ThrowMsgGetExceptions()
 {
     switch (errno)
     {
-        case EACCES:
-            throw runtime_error("msgget: No Permission to access the queue");
-            break;
+    case EACCES:
+        throw runtime_error("msgget: No Permission to access the queue");
+        break;
 
-        case EEXIST :
-            throw runtime_error("msgget: IPC_CREAT and IPC_EXCL were specified in msgflg, but a message queue already exists for key");
-            break;
+    case EEXIST :
+        throw runtime_error("msgget: IPC_CREAT and IPC_EXCL were specified in msgflg, but a message queue already exists for key");
+        break;
 
-        case  ENOENT:
-            throw runtime_error("msgget: No message queue exists for key and msgflg did not specify IPC_CREAT");
-            break;
+    case  ENOENT:
+        throw runtime_error("msgget: No message queue exists for key and msgflg did not specify IPC_CREAT");
+        break;
 
-        case ENOMEM:
-            throw runtime_error("msgget: A message queue has to be created but the system does not have enough memory for the new data structure");
-            break;
+    case ENOMEM:
+        throw runtime_error("msgget: A message queue has to be created but the system does not have enough memory for the new data structure");
+        break;
 
-        case ENOSPC:
-            throw runtime_error("msgget: A message queue has to be created but the system limit for the maximum number of message queues (MSGMNI) would be exceeded");
-            break;
+    case ENOSPC:
+        throw runtime_error("msgget: A message queue has to be created but the system limit for the maximum number of message queues (MSGMNI) would be exceeded");
+        break;
 
-        default:
-            throw  system_error(errno, generic_category(), "msgget");
-            break;
+    default:
+        throw  system_error(errno, generic_category(), "msgget");
+        break;
     }
 }
 
@@ -340,32 +366,45 @@ void ThreadSpawner::PrintMsgRcvErrors(int msgQId)
 {
     switch (errno)
     {
-        case E2BIG :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: The size of tmPkt is greater than expected" << endl;
-            break;
+    case E2BIG :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: The size of tmPkt is greater than expected" << endl;
+        break;
 
-        case EACCES :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: Operation permission is denied to the calling process" << endl;
-            break;
+    case EACCES :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: Operation permission is denied to the calling process" << endl;
+        break;
 
-        case EIDRM :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: The message queue identifier msgQId is removed from the system" << endl;
-            break;
+    case EIDRM :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: The message queue identifier msgQId is removed from the system" << endl;
+        break;
 
-        case EINTR :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: Interrupted by a signal" << endl;
-            break;
+    case EINTR :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: Interrupted by a signal" << endl;
+        break;
 
-        case EINVAL :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: msgQId is not a valid message queue identifier" << endl;
-            break;
+    case EINVAL :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: msgQId is not a valid message queue identifier" << endl;
+        break;
 
-        case ENOMSG :
-            cerr << "msgQId: [" << msgQId << "] msgrcv: The queue does not contain a message of the desired type" << endl;
-            break;
+    case ENOMSG :
+        cerr << "msgQId: [" << msgQId << "] msgrcv: The queue does not contain a message of the desired type" << endl;
+        break;
 
-        default:
-            cerr << "msgQId: [" << msgQId << "] msgrcv: " << strerror(errno) << endl;
-            break;
+    default:
+        cerr << "msgQId: [" << msgQId << "] msgrcv: " << strerror(errno) << endl;
+        break;
     }
+}
+
+
+void ThreadSpawner::PrintPacketDetails(TMPacketStructure tmPkt)
+{
+    //            printf("STN_Code: %02X \n", tmPkt.StnCode);
+    //            printf("DataType: %02X \n", tmPkt.DataType);
+    //            printf("TMSource: %02X \n", tmPkt.TMSource);
+
+    for (int i = 0; i < 10; i++)
+        printf("%02X ", tmPkt.ReceivedTime[i]);
+
+    cout << endl;
 }

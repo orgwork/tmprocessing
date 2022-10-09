@@ -40,8 +40,7 @@ public:
     static const char ERR_STR_NOT_CONDN[MAXERRMSGLEN];
     static const char ERR_STR_INVALID_CONDN_INDEX[MAXERRMSGLEN];
     static const char ERR_STR_INVALID_TRTHTBL_INDEX[MAXERRMSGLEN];
-
-    
+    static const char ERR_STR_FILENOTFOUND[MAXERRMSGLEN];
     
 
     

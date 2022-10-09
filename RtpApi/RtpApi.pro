@@ -11,10 +11,11 @@ QMAKE_CXX = gcc
 
 SOURCES += \
     ../CommonClasses/TMConfiguration.cpp \
+    RtpTmApi.cpp \
     rtpapi.cpp
 
 HEADERS += \
     ../CommonClasses/TMConfiguration.h \
-    rtpapi.h \
-    rtpapi.hpp
+    RtpTmApi.hpp \
+    rtpapi.h
 
